@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+<title>Locate an Unknown non-ASCII Multi-byte Character in a File &middot; Halting Problems</title>
+
+
+<link rel="stylesheet" href=/css/fonts.css>
+<link rel="stylesheet" href=/css/syntax.css>
+<link rel="stylesheet" href=/css/stix.css>
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144"
+      href=/apple-touch-icon-144-precomposed.png>
+<link rel="shortcut icon" href=/favicon.ico>
+
+
+<meta property="og:url" content="https://haltingproblems.github.io/post/locate-nonascii-multibyte-character/">
+  <meta property="og:site_name" content="Halting Problems">
+  <meta property="og:title" content="Locate an Unknown non-ASCII Multi-byte Character in a File">
+  <meta property="og:description" content="Problem Some program or API is failing because of a rouge multi-byte character in a file. So how do you locate the unknown character without examining every character in the file?
+Answer (annoying, but correct) Every search points to -P with grep, but that’s GNU grep not BSD grep that macOS ships with. Get over it and install goddamn GNU grep. 1
+$ brew install grep When brew is done it will inform you that any command (binary) installed will have the prefix “g” for GNU.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2020-01-13T00:00:00+00:00">
+    <meta property="article:modified_time" content="2020-01-13T00:00:00+00:00">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Locate an Unknown non-ASCII Multi-byte Character in a File">
+  <meta name="twitter:description" content="Problem Some program or API is failing because of a rouge multi-byte character in a file. So how do you locate the unknown character without examining every character in the file?
+Answer (annoying, but correct) Every search points to -P with grep, but that’s GNU grep not BSD grep that macOS ships with. Get over it and install goddamn GNU grep. 1
+$ brew install grep When brew is done it will inform you that any command (binary) installed will have the prefix “g” for GNU.">
+
+
+</head>
+<body>
+<div class="page">
+  <div class="page-width">
+    <header class="masthead container">
+    <h1 class="masthead-title">
+      <a href=/ title="Home">Halting Problems</a>
+    </h1>
+    
+    <nav class="nav">
+      [
+      
+          <a href="/">Home</a>
+      
+         | <a href="/portfolio/">Portfolio</a>
+      
+         | <a href="/about/">About</a>
+      
+      ]
+    </nav>
+</header>
+
+    <main class="container">
+      
+
+
+
+
+
+
+<div class="post">
+  <header class="post-header">
+    <h1 class="post-title">Locate an Unknown non-ASCII Multi-byte Character in a File</h1>
+    
+    <div class="post-metadata">
+      <span class="post-date">Jan 13, 2020</span>
+    </div>
+  </header>
+  <h2 id="problem">Problem</h2>
+<p>Some program or API is failing because of a rouge multi-byte
+character in a file. So how do you locate the unknown character
+without examining every character in the file?</p>
+<h2 id="answer--annoying-but-correct">Answer (annoying, but correct)</h2>
+<p>Every search points to <code>-P</code> with grep, but that&rsquo;s GNU grep not BSD
+grep that macOS ships with. Get over it and install goddamn GNU
+grep. <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ brew install grep
+</span></span></code></pre></div><p>When brew is done it will inform you that any command (binary)
+installed will have the prefix &ldquo;g&rdquo; for GNU.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">All commands have been installed with the prefix &#34;g&#34;.
+</span></span></code></pre></div><p>Thus to use GNU grep on macOS type <code>ggrep</code>. To find all occurrences
+of multi-byte character in <code>badfile.txt</code> input the following</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ ggrep --color=&#39;auto&#39; -P -n &#39;[^\x00-\x7F]&#39; badfile.txt
+</span></span></code></pre></div><div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>There definitely has to be a better way (something with non-GNU stuff).&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+  <p class="lastmod">Last modified: 2020-01-13 00:00:00 &#43;0000 UTC</p>
+</div>
+
+    </main>
+    <footer class="colophon container">
+  <p class="copyright">&copy; 2025. All rights reserved.</p>
+  <p class="signature">∃</p>
+</footer>
+
+  </div>
+</div>
+</body>
+</html>

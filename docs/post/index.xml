@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Halting Problems</title>
+    <link>https://haltingproblems.github.io/post/</link>
+    <description>Recent content in Posts on Halting Problems</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <copyright>Copyright © 2025, Eddie Hillenbrand</copyright>
+    <lastBuildDate>Sat, 05 Apr 2025 10:59:11 -0500</lastBuildDate>
+    <atom:link href="https://haltingproblems.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Swift Package Manager, same as it ever was</title>
+      <link>https://haltingproblems.github.io/post/swiftpm-same-as-it-ever-was/</link>
+      <pubDate>Sat, 05 Apr 2025 10:59:11 -0500</pubDate>
+      <guid>https://haltingproblems.github.io/post/swiftpm-same-as-it-ever-was/</guid>
+      <description>&lt;p&gt;&#xA;After working on a framework built with Objective-C, I bundled the&#xA;framework variants into an XCFramework and set up a &lt;code class=&#34;verbatim&#34;&gt;Package.swift&lt;/code&gt;&#xA;manifest for distributing SDK releases. While doing so, I ran into the&#xA;following conundrum:&lt;/p&gt;&#xA;&lt;p&gt;&#xA;I want to make releases like this: bump the version number, make a&#xA;release commit; build the binaries and embed version identifier in in&#xA;the binaries as &lt;code class=&#34;verbatim&#34;&gt;Framework vM.m.p:branch@hash:config&lt;/code&gt; (where &lt;code class=&#34;verbatim&#34;&gt;M&lt;/code&gt; is&#xA;major, &lt;code class=&#34;verbatim&#34;&gt;m&lt;/code&gt; is minor, and &lt;code class=&#34;verbatim&#34;&gt;p&lt;/code&gt; is the patch components of the version&#xA;string); create the release on GitHub with the tag &lt;code class=&#34;verbatim&#34;&gt;vM.m.p&lt;/code&gt; and attach&#xA;the binaries to the GitHub release. Binaries are available in both&#xA;signed and unsigned variants—so no binary voodoo is possible, even&#xA;if that would fix my problem.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Better Scripting</title>
+      <link>https://haltingproblems.github.io/post/better-scripting/</link>
+      <pubDate>Mon, 07 Mar 2022 13:10:31 -0800</pubDate>
+      <guid>https://haltingproblems.github.io/post/better-scripting/</guid>
+      <description>&lt;p&gt;&#xA;The state of scriptable software is disappointing.&lt;sup class=&#34;footnote-reference&#34;&gt;&lt;a id=&#34;footnote-reference-1&#34; href=&#34;#footnote-1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;&#xA;&lt;p&gt;&#xA;AppleScript in particular drives me crazy. Its not interactive like&#xA;many other scripting languages. It is overly verbose (and that’s&#xA;coming from someone that loves &lt;a href=&#34;https://objc-lang.org&#34;&gt;ObjC&lt;/a&gt;). Worst of all, it isn’t&#xA;discoverable.&lt;/p&gt;&#xA;&lt;p&gt;&#xA;Apple attempted to fix AppleScript by providing JavaScript bindings.&#xA;Unfortunately, the JS bindings don’t make scripting much better. The&#xA;JS bindings suffer from all the afflictions of AppleScript, but with a&#xA;vaguely JS feel.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Vacuous Truths</title>
+      <link>https://haltingproblems.github.io/post/vacuous-truths/</link>
+      <pubDate>Sat, 22 Jan 2022 05:49:26 -0800</pubDate>
+      <guid>https://haltingproblems.github.io/post/vacuous-truths/</guid>
+      <description>&lt;p class=&#34;message warning&#34;&gt;⚠️ This homepage is no longer named Vacuous&#xA;Truth. I let the domain expire. So this post is now apropos of nothing.&lt;/p&gt;&#xA;&lt;p&gt;&#xA;I want to explain why this homepage is named Vacuous Truth. It is&#xA;because I love the concept of vacuously true logical statements.&#xA;Besides the fact that a vacuous truth is a part of math and&#xA;logic—which makes me love it by default—I especially love this concept&#xA;because it is the basis of &amp;#34;smartassery.&amp;#34;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>The Problem with Homebrew</title>
+      <link>https://haltingproblems.github.io/post/homebrew-problems/</link>
+      <pubDate>Tue, 02 Nov 2021 00:00:00 +0000</pubDate>
+      <guid>https://haltingproblems.github.io/post/homebrew-problems/</guid>
+      <description>&lt;p&gt;&#xA;I need to spill the tea on the Homebrew package manager, but first&#xA;some praise. Homebrew is a really good name. It&amp;#39;s cute! Its chock-full&#xA;of Apple history: the &lt;a href=&#34;https://americanhistory.si.edu/collections/search/object/nmah_1692121&#34;&gt;Apple I&lt;/a&gt; computer was introduced at &lt;a href=&#34;https://www.computerhistory.org/revolution/personal-computers/17/312&#34;&gt;the Homebrew&#xA;Computer Club&lt;/a&gt;.&lt;/p&gt;&#xA;&lt;img src=&#34;./hb-club.jpg&#34; alt=&#34;./hb-club.jpg&#34; title=&#34;Jobs &amp;amp; Woz at the Homebrew Computer Club&#34; class=&#34;center&#34;/&gt;&#xA;&lt;p&gt;&#xA;The name evokes nostalgia, I&amp;#39;m getting a warm feeling just thinking&#xA;about retro computers. The clickety-clack of the mechanical keys, the&#xA;low-frequency grind of floppy drive, the smell of the electronics and&#xA;the printed manuals. Even Terminal.app ships with a retro theme called&#xA;Homebrew.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Org Babel</title>
+      <link>https://haltingproblems.github.io/post/org-babel/</link>
+      <pubDate>Mon, 20 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>https://haltingproblems.github.io/post/org-babel/</guid>
+      <description>&lt;link rel=&#34;stylesheet&#34; href=&#34;https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css&#34; integrity=&#34;sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ&#34; crossorigin=&#34;anonymous&#34;&gt;&#xA;&lt;script defer src=&#34;https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js&#34; integrity=&#34;sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij&#34; crossorigin=&#34;anonymous&#34;&gt;&lt;/script&gt;&#xA;&lt;script defer src=&#34;https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js&#34; integrity=&#34;sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI&#34; crossorigin=&#34;anonymous&#34; onload=&#34;renderMathInElement(document.body);&#34;&gt;&lt;/script&gt;&#xA;&lt;script&gt;&#xA;document.addEventListener(&#34;DOMContentLoaded&#34;, function() {&#xA;renderMathInElement(document.body, {&#xA;delimiters: [{left: &#34;\\(&#34;, right: &#34;\\)&#34;, display: true}],&#xA;})&#xA;})&#xA;&lt;/script&gt;&#xA;&lt;div id=&#34;outline-container-headline-1&#34; class=&#34;outline-2&#34;&gt;&#xA;&lt;h2 id=&#34;headline-1&#34;&gt;&#xA;Code Blocks&#xA;&lt;/h2&gt;&#xA;&lt;div id=&#34;outline-text-headline-1&#34; class=&#34;outline-text-2&#34;&gt;&#xA;&lt;p&gt;&#xA;At the heart of Babel are Org code blocks. Code blocks are delimited&#xA;with a special comment syntax. Here is an example code block in Elisp:&lt;/p&gt;&#xA;&lt;pre class=&#34;example&#34;&gt;&#xA;#+BEGIN_SRC elisp&#xA;  (defun mccarthy91 (n)&#xA;     &amp;#34;McCarthy 91 is used as a formal verification test case.&amp;#34;&#xA;     (if (&amp;lt;= n 100)&#xA;         (mccarthy91 (mccarthy91 (+ n 11)))&#xA;       (- n 10)))&#xA;#+END_SRC&#xA;&lt;/pre&gt;&#xA;&lt;p&gt;&#xA;The basic form is simple. A chunk of code is surrounded by&#xA;&lt;code class=&#34;verbatim&#34;&gt;#+BEGIN_SRC lang&lt;/code&gt; … &lt;code class=&#34;verbatim&#34;&gt;#+END_SRC&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Grammar Checking in Emacs</title>
+      <link>https://haltingproblems.github.io/post/grammar-checking-in-emacs/</link>
+      <pubDate>Wed, 15 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>https://haltingproblems.github.io/post/grammar-checking-in-emacs/</guid>
+      <description>&lt;p class=&#34;message warning&#34;&gt;⚠️ This post was &lt;i&gt;actually&lt;/i&gt; written in&#xA;&lt;b&gt;2013&lt;/b&gt; and is out of date.&lt;/p&gt;&#xA;&lt;p&gt;Grammar checking is apparently an error prone task. Or at least it has&#xA;been claimed: &lt;a href=&#34;http://faculty.washington.edu/sandeep/check&#34;&gt;http://faculty.washington.edu/sandeep/check&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;Looks like there is &lt;a href=&#34;http://www.gnu.org/software/diction/&#34;&gt;GNU&#xA;diction&lt;/a&gt;, but it just highlights&#xA;potentially misused words. It doesn&amp;rsquo;t indicate where an error&#xA;occurred. I&amp;rsquo;m not comfortable investing much time into getting this&#xA;working with Emacs. Since there doesn&amp;rsquo;t appear to be much return for&#xA;the effort.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Locate an Unknown non-ASCII Multi-byte Character in a File</title>
+      <link>https://haltingproblems.github.io/post/locate-nonascii-multibyte-character/</link>
+      <pubDate>Mon, 13 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>https://haltingproblems.github.io/post/locate-nonascii-multibyte-character/</guid>
+      <description>&lt;h2 id=&#34;problem&#34;&gt;Problem&lt;/h2&gt;&#xA;&lt;p&gt;Some program or API is failing because of a rouge multi-byte&#xA;character in a file. So how do you locate the unknown character&#xA;without examining every character in the file?&lt;/p&gt;&#xA;&lt;h2 id=&#34;answer--annoying-but-correct&#34;&gt;Answer (annoying, but correct)&lt;/h2&gt;&#xA;&lt;p&gt;Every search points to &lt;code&gt;-P&lt;/code&gt; with grep, but that&amp;rsquo;s GNU grep not BSD&#xA;grep that macOS ships with. Get over it and install goddamn GNU&#xA;grep. &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ brew install grep&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When brew is done it will inform you that any command (binary)&#xA;installed will have the prefix &amp;ldquo;g&amp;rdquo; for GNU.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Spellchecking in Emacs</title>
+      <link>https://haltingproblems.github.io/post/spellchecking-in-emacs/</link>
+      <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>https://haltingproblems.github.io/post/spellchecking-in-emacs/</guid>
+      <description>&lt;p class=&#34;message warning&#34;&gt;⚠️ This post was &lt;i&gt;actually&lt;/i&gt; written in&#xA;&lt;b&gt;2013&lt;/b&gt; and is out of date.&lt;/p&gt;&#xA;&lt;p&gt;Emacs doesn&amp;rsquo;t have a built-in dictionary, but it does have an&#xA;interface for checking and correcting spelling. The interface is&#xA;called &lt;code&gt;ispell&lt;/code&gt; (the &lt;em&gt;i&lt;/em&gt; is for interactive). To use&#xA;&lt;code&gt;ispell&lt;/code&gt; simply run &lt;kbd&gt;M-x ispell&lt;/kbd&gt;. By itself it&amp;rsquo;s&#xA;pretty useless and you&amp;rsquo;ll get an error in the mini-buffer.&lt;/p&gt;&#xA;&lt;pre&gt;&lt;code&gt;Searching for program: no such file or directory, ispell&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&lt;p&gt;As the error says, Emacs need an external program for&#xA;spellchecking. There are a few options:&#xA;&lt;a href=&#34;http://ficus-www.cs.ucla.edu/geoff/ispell.html&#34;&gt;Ispell&lt;/a&gt;, &lt;a href=&#34;http://www.gnu.org/software/aspell/&#34;&gt;GNU&#xA;Aspell&lt;/a&gt;, or&#xA;&lt;a href=&#34;http://hunspell.sourceforge.net&#34;&gt;Hunspell&lt;/a&gt;. Personally I use Aspell,&#xA;but Hunspell is also decent from what I understand. Aspell was&#xA;designed to replace Ispell, so I don&amp;rsquo;t recommend using Ispell.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>First Post</title>
+      <link>https://haltingproblems.github.io/post/first-post/</link>
+      <pubDate>Thu, 09 Jan 2020 14:23:39 -0800</pubDate>
+      <guid>https://haltingproblems.github.io/post/first-post/</guid>
+      <description>&lt;p&gt;&#xA;Let&amp;#39;s see if I can update this site on a regular basis. 🤞&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

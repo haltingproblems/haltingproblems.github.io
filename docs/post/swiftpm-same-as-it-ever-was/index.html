@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+<title>Swift Package Manager, same as it ever was &middot; Halting Problems</title>
+
+
+<link rel="stylesheet" href=/css/fonts.css>
+<link rel="stylesheet" href=/css/syntax.css>
+<link rel="stylesheet" href=/css/stix.css>
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144"
+      href=/apple-touch-icon-144-precomposed.png>
+<link rel="shortcut icon" href=/favicon.ico>
+
+
+<meta property="og:url" content="https://haltingproblems.github.io/post/swiftpm-same-as-it-ever-was/">
+  <meta property="og:site_name" content="Halting Problems">
+  <meta property="og:title" content="Swift Package Manager, same as it ever was">
+  <meta property="og:description" content="After working on a framework built with Objective-C, I bundled the framework variants into an XCFramework and set up a Package.swift manifest for distributing SDK releases. While doing so, I ran into the following conundrum:
+I want to make releases like this: bump the version number, make a release commit; build the binaries and embed version identifier in in the binaries as Framework vM.m.p:branch@hash:config (where M is major, m is minor, and p is the patch components of the version string); create the release on GitHub with the tag vM.m.p and attach the binaries to the GitHub release. Binaries are available in both signed and unsigned variants—so no binary voodoo is possible, even if that would fix my problem.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2025-04-05T10:59:11-05:00">
+    <meta property="article:modified_time" content="2025-04-05T10:59:11-05:00">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Swift Package Manager, same as it ever was">
+  <meta name="twitter:description" content="After working on a framework built with Objective-C, I bundled the framework variants into an XCFramework and set up a Package.swift manifest for distributing SDK releases. While doing so, I ran into the following conundrum:
+I want to make releases like this: bump the version number, make a release commit; build the binaries and embed version identifier in in the binaries as Framework vM.m.p:branch@hash:config (where M is major, m is minor, and p is the patch components of the version string); create the release on GitHub with the tag vM.m.p and attach the binaries to the GitHub release. Binaries are available in both signed and unsigned variants—so no binary voodoo is possible, even if that would fix my problem.">
+
+
+</head>
+<body>
+<div class="page">
+  <div class="page-width">
+    <header class="masthead container">
+    <h1 class="masthead-title">
+      <a href=/ title="Home">Halting Problems</a>
+    </h1>
+    
+    <nav class="nav">
+      [
+      
+          <a href="/">Home</a>
+      
+         | <a href="/portfolio/">Portfolio</a>
+      
+         | <a href="/about/">About</a>
+      
+      ]
+    </nav>
+</header>
+
+    <main class="container">
+      
+
+
+
+
+
+
+<div class="post">
+  <header class="post-header">
+    <h1 class="post-title">Swift Package Manager, same as it ever was</h1>
+    
+    <div class="post-metadata">
+      <span class="post-date">Apr 5, 2025</span>
+    </div>
+  </header>
+  <p>
+After working on a framework built with Objective-C, I bundled the
+framework variants into an XCFramework and set up a <code class="verbatim">Package.swift</code>
+manifest for distributing SDK releases. While doing so, I ran into the
+following conundrum:</p>
+<p>
+I want to make releases like this: bump the version number, make a
+release commit; build the binaries and embed version identifier in in
+the binaries as <code class="verbatim">Framework vM.m.p:branch@hash:config</code> (where <code class="verbatim">M</code> is
+major, <code class="verbatim">m</code> is minor, and <code class="verbatim">p</code> is the patch components of the version
+string); create the release on GitHub with the tag <code class="verbatim">vM.m.p</code> and attach
+the binaries to the GitHub release. Binaries are available in both
+signed and unsigned variants—so no binary voodoo is possible, even
+if that would fix my problem.</p>
+<p>
+Trouble is the Swift Package Manager expects the package manifest at
+the root of repository named <code class="verbatim">Package.swift</code> and to deliver binaries,
+the package manifest must contain URLs to the ZIP&#39;d binaries and
+checksum of those ZIP files. That means I&#39;d have to make a second
+separate commit to update the package manifest—now the binaries
+point to the commit before the package manifest was updated and the
+manifest tagged at <code class="verbatim">M.m.p</code> actually points to the previous release.</p>
+<p>
+The framework is a commercial open source product, but I don&#39;t want to
+support peoples &#34;modifications&#34; in the wild. They&#39;re free to do so,
+but if they send a support ticket and the log shows a version
+identifier that didn&#39;t originate in my source tree, good luck.  In
+reality I wouldn&#39;t be so harsh, just send me your changes as a
+PR—then I can help.</p>
+<p>
+So to fix this I have two bad options, don&#39;t embed the branch and hash
+info for all builds, meaning <code class="verbatim">M.m.p</code> could be any built version from
+<code class="verbatim">M.m.p</code> ahead by some arbitrary number of commits. Or build separate
+Swift PM only binaries with version identifiers of the from <code class="verbatim">Framework
+vM.m.p:branch@hash+swiftpm:config</code>, so I know <code class="verbatim">hash</code> is probably
+equivalent to <code class="verbatim">releasetag^</code>.</p>
+<p>
+I picked the latter option. That means Unity, CocoaPods, Carthage, and
+manual integrations will always be uniquely identifiable, but I have
+to do extra work for Swift PM and the version identifier is just a
+crumb trail.</p>
+<p>
+Other potential options could be putting <code class="verbatim">Package.swift</code> in a separate
+repo, but that sucks too. Or putting <code class="verbatim">Package.swift</code> in an orphaned
+branch, but that would still mean the release tags are wrong for Swift
+PM. Nevertheless, both these options would require telling publishers
+that they have to do <em>extra</em> stuff to make Swift PM work and that&#39;s
+error prone at best.</p>
+<p>
+Anyway, just ranting. Unless I&#39;m overlooking and obvious way to break
+a cyclic graph. Package managers are great, until they&#39;re not.</p>
+
+  <p class="lastmod">Last modified: 2025-04-05 10:59:11 -0500 CDT</p>
+</div>
+
+    </main>
+    <footer class="colophon container">
+  <p class="copyright">&copy; 2025. All rights reserved.</p>
+  <p class="signature">∃</p>
+</footer>
+
+  </div>
+</div>
+</body>
+</html>

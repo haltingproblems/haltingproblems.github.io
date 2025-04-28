@@ -1,0 +1,475 @@
+/*
+ *         ___                                   ___
+ *        /  /\          ___       ___          /__/|
+ *       /  /:/_        /  /\     /  /\        |  |:|
+ *      /  /:/ /\      /  /:/    /  /:/        |  |:|
+ *     /  /:/ /::\    /  /:/    /__/::\      __|__|:|
+ *    /__/:/ /:/\:\  /  /::\    \__\/\:\__  /__/::::\____
+ *    \  \:\/:/~/:/ /__/:/\:\      \  \:\/\    ~\~~\::::/
+ *     \  \::/ /:/  \__\/  \:\      \__\::/     |~~|:|~~
+ *      \__\/ /:/        \  \:\     /__/:/      |  |:|
+ *        /__/:/          \__\/     \__\/       |  |:|
+ *        \__\/                                 |__|/
+ *  _____ _                    ___
+ * |_   _| |_ ___ _____ ___   |  _|___ ___
+ *   | | |   | -_|     | -_|  |  _| . |  _|  Hugo the static
+ *   |_| |_|_|___|_|_|_|___|  |_| |___|_|    site generator.
+ *
+ *
+ * ---------------------------------------------------------
+ *
+ *
+ * STIX Theme for Hugo
+ * ===================
+ *
+ * Scientific and Technical Information Exchange (STIX) theme for
+ * Hugo.
+ *
+ * MIT license by @haltingproblems
+ * https://github.com/eddieh/stix-hugo
+ */
+
+/*
+ * Some styles roughly based on poole & lanyon themes:
+ * - https://github.com/poole/poole
+ * - https://github.com/poole/lanyon
+ */
+
+:root {
+    --heading-fonts: Helvetica, Arial, sans-serif;
+    --body-fonts: STIXTwoText, STIXGeneral, "Times New Roman", serif;
+    --mono-fonts: DejaVuSansMono, "DejaVu Sans Mono", Menlo, "Lucida Console", Monaco, monospace;
+    --bg: #f7f7f7;
+}
+
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--body-fonts);
+    font-size: 120%;
+    color: #313131;
+    background-color: var(--bg);
+    /* -webkit-text-size-adjust: 100%; */
+    /* -ms-text-size-adjust: 100%; */
+    /* text-size-adjust: 100%; */
+}
+
+.page {
+    width: 100%;
+    overflow: hidden;
+}
+
+.container {
+    padding: 0 1rem;
+    margin: 0 auto;
+    position: relative;
+    font-family: var(--body-fonts);
+    /* font-size: 120%; */
+    font-size: 1.2rem;
+    letter-spacing: normal;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--heading-fonts);
+    font-weight: normal;
+    color: #313131;
+    margin-top: 2em;
+}
+
+a {
+    color: #268bd2;
+    text-decoration: none;
+}
+a strong {
+    color: inherit;
+}
+a:hover,
+a:focus {
+    text-decoration: underline;
+}
+
+ul, ol, dl {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+dt {
+  font-weight: bold;
+}
+dd {
+  margin-bottom: .5rem;
+}
+
+sub { font-variant-position: sub; }
+sup { font-variant-position: sup; }
+
+hr {
+  position: relative;
+  margin: 1.5rem 0;
+  border: 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #fff;
+}
+
+abbr {
+  font-size: 85%;
+  font-weight: bold;
+  color: #555;
+  text-transform: uppercase;
+}
+abbr[title] {
+  cursor: help;
+  border-bottom: 1px dotted #e5e5e5;
+}
+
+code, pre, kbd, .pre-block {
+    font-family: var(--mono-fonts);
+    text-rendering: optimizeLegibility;
+    color: #3c3c3c;
+    background-color: #dedeed;
+}
+
+code, .pre-block {
+    padding: .125em .25em;
+    border-radius: 3px;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+pre {
+    overflow-x: scroll;
+    background-color: #dedeed;
+    padding: 16px 0;            /* enough padding for the horizontal scrollbar */
+    position: relative;
+    width: 100vw;
+    left: 50%;
+    transform: translate(-50%);
+    clear: both;
+}
+
+pre code {
+    display: block;
+    padding: 0 16px;            /* enough padding for the vertical scrollbar */
+}
+
+/* kbd style base on
+ * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/kbd
+ */
+kbd {
+    background-color: #eee;
+    border-radius: 3px;
+    border: 1px solid #b4b4b4;
+    /* box-shadow: 0 1px 1px rgba(0, 0, 0, .2), */
+    /*             0 2px 0 0 rgba(255, 255, 255, .7) */
+    /*             inset; */
+    color: #333;
+    display: inline;
+    font-size: 1rem;
+    font-weight: bold;
+    line-height: 1;
+    padding: .125em .25em;
+    white-space: nowrap;
+}
+
+pre.example {
+    font-size: 1rem;
+    overflow-x: auto;
+    background-color: #ededed;
+    padding: .5rem;
+    position: initial;
+    width: initial;
+    left: initial;
+    transform: none;
+    clear: none;
+}
+
+blockquote {
+    padding: 0 1em 0 1em;
+    margin: 0 0 0 3.5rem;
+    color: #7a7a7a;
+    border-left: .25rem solid #7b7b7b;
+}
+blockquote p {
+    margin: 0 0 1em;
+    padding: 0;
+}
+blockquote p:last-child {
+    margin: 0;
+}
+blockquote::before {
+    content: "“";
+    position: absolute;
+    left: 0;
+    font-size: 5em;
+    padding-left: 1rem;
+    line-height: .95;
+    color: #ddd;
+}
+
+.attribution {
+    text-align: end;
+    color: #555;
+}
+
+
+img {
+  display: block;
+  max-width: 100%;
+  margin: 0 0 1rem;
+  border-radius: 5px;
+}
+
+table {
+    margin-left: auto;
+    margin-right: auto;
+    border-top: 2px solid;
+    border-bottom: 2px solid;
+    border-collapse: collapse;
+}
+
+thead {
+    border-bottom: 2px solid;
+}
+
+table td + td, table th + th {
+    border-left: 1px solid var(--tbl-vborder-color);
+}
+
+table tr {
+    border-top: 1px solid var(--tbl-hborder-color);
+}
+
+td, th {
+    padding: 0.3em 0.6em;
+    vertical-align: middle;
+}
+
+.org-right { text-align: right; }
+.org-left { text-align: left; }
+.org-center { text-align: center; }
+
+caption.t-above { caption-side: top; }
+caption.t-bottom { caption-side: bottom; }
+
+caption, figcaption {
+    margin-bottom: 0.3em;
+}
+
+.lead, .lead-block {
+  font-size: 1.75rem;
+  font-weight: 300;
+}
+
+.message {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  color: #717171;
+  background-color: #f9f9f9;
+}
+
+.message.warning {
+    background-color: #fffaf3;
+    color: #573a08;
+    -webkit-box-shadow: 0 0 0 1px #c9ba9b inset,0 0 0 0 transparent;
+    box-shadow: 0 0 0 1px #c9ba9b inset,0 0 0 0 transparent;
+    border-radius: .32rem;
+    font-family: sans-serif;
+    margin-bottom: 3rem;
+}
+
+.masthead {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 4rem;
+}
+.masthead-title {
+    font-size: 2.5rem;
+    margin-top: 0;
+    color: #dadada;
+    display: inline-block;
+}
+.masthead-title a {
+    color: #dadada;
+    text-decoration: none;
+}
+.masthead-title small {
+    font-size: .25rem;
+    font-weight: 400;
+    color: #c0c0c0;
+    letter-spacing: 0;
+}
+.masthead .nav {
+    display: inline-block;
+    float: right;
+    height: auto;
+}
+
+.post {
+    margin-bottom: 1.5em;
+}
+
+.post-header { margin-bottom: 3.5rem; }
+.post-title {
+    margin-top: 1rem;
+    margin-bottom: 0;
+    font-size: 2.75rem;
+}
+.post-subtitle {
+    margin-top: .25rem;
+    margin-bottom: 0;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #8080a0;
+}
+.post-metadata { margin-top: 1.75rem; }
+.post-date {
+    color: #9a9a9a;
+    font-style: italic;
+}
+
+.posts .post-title { font-size: 1.5rem }
+.posts .post-date { font-size: .85rem; }
+
+.page-type {
+    display: none;
+}
+.page-status {
+    font-family: var(--heading-fonts);
+    font-size: .8rem;
+    font-weight: bold;
+    padding: .2rem;
+    background-color: #ffe484;
+    color: #555;
+    border-radius: 6px;
+    box-shadow: inset 0 -1px 1px rgba(33, 37, 41, 0.15),
+                0 0.25rem 1.5rem rgba(255, 255, 255, 0.75);
+}
+
+.footnotes {}
+.footnotes-separatator {}
+.footnote-definitions {}
+.footnote-definition {
+    display: list-item;
+    list-style-type: none;
+}
+.footnote-definition sup {
+    vertical-align: middle;
+    font-size: 1rem;
+    font-weight: bold;
+}
+.footnote-body {
+    display: inline-table;
+    margin-left: 1em;
+    width: 90%;
+}
+.footnote-body p {}
+
+.lastmod {
+    font-size: .85rem;
+    font-style: italic;
+    color: #9a9a9a;
+    margin-top: 2.5rem;
+}
+
+.pagination {
+    margin-top: 2em;
+}
+
+.colophon {
+    margin-top: 8rem;
+    min-height: 16rem;
+}
+
+.copyright {
+    font-size: .75rem;
+    color: #c0c0c0;
+    text-align: center;
+}
+
+.signature {
+    text-align: center;
+    margin-top: 2.5em;
+    font-size: 1.25rem;
+}
+
+aside, .aside-block {
+    display: block;
+    margin-top: 2em;
+    font-family: sans-serif;
+    top: -1px;
+    background: #eee;
+    padding: .5em;
+    border-top: 5px solid #666;
+}
+aside > p, .aside-block > p { margin: 0; }
+
+.width-100p { width: 100% }
+.width-75p { width: 75% }
+.width-50p { width: 50% }
+.width-25p { width: 25% }
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+.text-center { text-align: center; }
+
+.font-size-base { font-size: 1rem; }
+.font-size-sm { font-size: .75rem; }
+.font-size-lg { font-size: 2rem; }
+
+@media (min-width: 320px) {
+    pre code {
+        font-size: 9px;
+        letter-spacing: -.5px;
+    }
+}
+
+@media (min-width: 375px) {
+    pre code {
+        font-size: 9px;
+        letter-spacing: -.25px;
+    }
+}
+
+@media (min-width: 414px) {
+    pre code {
+        font-size: 9px;
+        letter-spacing: -.25px;
+    }
+}
+
+@media (min-width: 460px) and (max-width: 800px) {
+    pre code {
+        font-size: calc(100vw / 48);
+        letter-spacing: -.25px;
+    }
+}
+
+@media (min-width: 800px) {
+    /* ATTN: this must be set to the same font used to display code at the
+       maximum size */
+    .page-width {
+        font-family: var(--mono-fonts);
+        font-size: 17px;
+        letter-spacing: normal;
+        max-width: calc(80ch + 2 * 16px);
+        margin: 0 auto;
+    }
+    pre code {
+        font-size: 17px;
+        letter-spacing: normal;
+        max-width: calc(80ch + 2 * 16px);
+        margin: 0 auto;
+    }
+}

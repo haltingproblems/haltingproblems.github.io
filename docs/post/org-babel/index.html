@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+<title>Org Babel &middot; Halting Problems</title>
+
+
+<link rel="stylesheet" href=/css/fonts.css>
+<link rel="stylesheet" href=/css/syntax.css>
+<link rel="stylesheet" href=/css/stix.css>
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144"
+      href=/apple-touch-icon-144-precomposed.png>
+<link rel="shortcut icon" href=/favicon.ico>
+
+
+<meta property="og:url" content="https://haltingproblems.github.io/post/org-babel/">
+  <meta property="og:site_name" content="Halting Problems">
+  <meta property="og:title" content="Org Babel">
+  <meta property="og:description" content="Code Blocks At the heart of Babel are Org code blocks. Code blocks are delimited with a special comment syntax. Here is an example code block in Elisp:
+#&#43;BEGIN_SRC elisp (defun mccarthy91 (n) &#34;McCarthy 91 is used as a formal verification test case.&#34; (if (&lt;= n 100) (mccarthy91 (mccarthy91 (&#43; n 11))) (- n 10))) #&#43;END_SRC The basic form is simple. A chunk of code is surrounded by #&#43;BEGIN_SRC lang … #&#43;END_SRC.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2020-01-20T00:00:00+00:00">
+    <meta property="article:modified_time" content="2020-01-20T00:00:00+00:00">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Org Babel">
+  <meta name="twitter:description" content="Code Blocks At the heart of Babel are Org code blocks. Code blocks are delimited with a special comment syntax. Here is an example code block in Elisp:
+#&#43;BEGIN_SRC elisp (defun mccarthy91 (n) &#34;McCarthy 91 is used as a formal verification test case.&#34; (if (&lt;= n 100) (mccarthy91 (mccarthy91 (&#43; n 11))) (- n 10))) #&#43;END_SRC The basic form is simple. A chunk of code is surrounded by #&#43;BEGIN_SRC lang … #&#43;END_SRC.">
+
+
+</head>
+<body>
+<div class="page">
+  <div class="page-width">
+    <header class="masthead container">
+    <h1 class="masthead-title">
+      <a href=/ title="Home">Halting Problems</a>
+    </h1>
+    
+    <nav class="nav">
+      [
+      
+          <a href="/">Home</a>
+      
+         | <a href="/portfolio/">Portfolio</a>
+      
+         | <a href="/about/">About</a>
+      
+      ]
+    </nav>
+</header>
+
+    <main class="container">
+      
+
+
+
+
+
+
+<div class="post">
+  <header class="post-header">
+    <h1 class="post-title">Org Babel</h1>
+    
+    <div class="post-metadata">
+      <span class="post-date">Jan 20, 2020</span>
+    </div>
+  </header>
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+renderMathInElement(document.body, {
+delimiters: [{left: "\\(", right: "\\)", display: true}],
+})
+})
+</script>
+<div id="outline-container-headline-1" class="outline-2">
+<h2 id="headline-1">
+Code Blocks
+</h2>
+<div id="outline-text-headline-1" class="outline-text-2">
+<p>
+At the heart of Babel are Org code blocks. Code blocks are delimited
+with a special comment syntax. Here is an example code block in Elisp:</p>
+<pre class="example">
+#+BEGIN_SRC elisp
+  (defun mccarthy91 (n)
+     &#34;McCarthy 91 is used as a formal verification test case.&#34;
+     (if (&lt;= n 100)
+         (mccarthy91 (mccarthy91 (+ n 11)))
+       (- n 10)))
+#+END_SRC
+</pre>
+<p>
+The basic form is simple. A chunk of code is surrounded by
+<code class="verbatim">#+BEGIN_SRC lang</code> … <code class="verbatim">#+END_SRC</code>.</p>
+<p>
+Code blocks can be modified with annotations, switches, and header
+arguments. The expanded structure follows</p>
+<pre class="example">
+#+NAME: &lt;name&gt;
+#+BEGIN_SRC &lt;language&gt; &lt;switches&gt; &lt;header arguments&gt;
+ &lt;body&gt;
+#+END_SRC
+</pre>
+<p>
+Especially useful are header arguments such as <code class="verbatim">:session</code>, <code class="verbatim">:results</code>,
+and <code class="verbatim">:exports</code>. Header arguments can be placed on the <code class="verbatim">#+BEGIN_SRC</code>
+line as follows</p>
+<pre class="example">
+#+BEGIN_SRC elisp :exports code
+ &lt;body&gt;
+#+END_SRC
+</pre>
+<p>
+Or they can be placed as code block annotations as follows</p>
+<pre class="example">
+#+HEADER: :exports code
+#+BEGIN_SRC elisp
+ &lt;body&gt;
+#+END_SRC
+</pre>
+<p>
+Multiple header blocks can be used in either form.</p>
+<pre class="example">
+#+BEGIN_SRC elisp :exports code :results replace table
+ &lt;body&gt;
+#+END_SRC
+
+#+HEADER: :exports code
+#+HEADER: :results replace table
+#+BEGIN_SRC elisp
+ &lt;body&gt;
+#+END_SRC
+</pre>
+<p>
+The <code class="verbatim">:exports</code> header argument is incredibly useful. It controls how
+the code block is used when exporting. It can simply list its code in
+the exported document by using <code class="verbatim">:exports code</code>. Or it can evaluate the
+code and export just the results using <code class="verbatim">:exports results</code>. To include
+both the code and the results in the exported document use <code class="verbatim">:exports
+both</code>. Finally the code and the results can be excluded from the
+exported document using <code class="verbatim">:exports none</code>.</p>
+</div>
+</div>
+<div id="outline-container-headline-2" class="outline-2">
+<h2 id="headline-2">
+Code Block Variables in Elisp
+</h2>
+<div id="outline-text-headline-2" class="outline-text-2">
+<p>
+Simple example shows setting a variable in a header comment.</p>
+<pre class="example">
+#+NAME: square_el
+#+HEADER: :var x=0
+#+BEGIN_SRC elisp
+  (* x x)
+#+END_SRC
+</pre>
+<p>
+Now we can use <code class="verbatim">#+CALL:</code> to invoke the named code block.</p>
+<p>
+<code class="verbatim">#+CALL: square_el(x=6)</code></p>
+<pre class="example">
+36
+</pre>
+</div>
+</div>
+<div id="outline-container-headline-3" class="outline-2">
+<h2 id="headline-3">
+Code Block Variables in Python
+</h2>
+<div id="outline-text-headline-3" class="outline-text-2">
+<p>
+Now a simple example in Python.</p>
+<pre class="example">
+#+NAME: square_py
+#+HEADER: :var x=0
+#+BEGIN_SRC python
+  return x * x
+#+END_SRC
+</pre>
+<p>
+Likewise we can use <code class="verbatim">#+CALL:</code> to invoke the named Python code block.</p>
+<p>
+<code class="verbatim">#+CALL: square_py(x=5)</code></p>
+<pre class="example">
+25
+</pre>
+</div>
+</div>
+<div id="outline-container-headline-4" class="outline-2">
+<h2 id="headline-4">
+Inline Code Block
+</h2>
+<div id="outline-text-headline-4" class="outline-text-2">
+<p>
+Code can be evaluated inline using <code class="verbatim">src_lang{code}</code>. Thus to get the
+current Emacs version use <code class="verbatim">src_elisp{(format &#34;%s&#34;
+emacs-major-version)}</code>. This document was prepared with Emacs
+<code class="verbatim">26</code>.</p>
+</div>
+</div>
+<div id="outline-container-headline-5" class="outline-2">
+<h2 id="headline-5">
+Inline Code Block with Arguments
+</h2>
+<div id="outline-text-headline-5" class="outline-text-2">
+<p>
+Inline code with arguments has the form <code class="verbatim">src_lang[args]{code}</code>. Thus
+we can assign a variable inline like so <code class="verbatim">src_elisp[:var x=25]{(sqrt
+x)}</code> can be used to show that \( \sqrt{25} = \) <code class="verbatim">5.0</code>.</p>
+</div>
+</div>
+<div id="outline-container-headline-6" class="outline-2">
+<h2 id="headline-6">
+Named Inline Calls
+</h2>
+<div id="outline-text-headline-6" class="outline-text-2">
+<p>
+Named code blocks can be called in a similar fashion and syntax used
+for inline code blocks. The form is <code class="verbatim">call_name()</code> or the expanded form
+<code class="verbatim">call_name[inside-header-args](args)[end-header-args]</code>.</p>
+<pre class="example">
+#+NAME: mcpython91
+#+BEGIN_SRC python :var in_from_org=0 :exports none
+ def mccarthy91(n):
+     &#34;McCarthy 91 is used as a formal verification test case.&#34;
+     if n &lt;= 100:
+         return mccarthy91(mccarthy91(n + 11))
+     else:
+         return n - 10
+
+ return mccarthy91(in_from_org)
+#+END_SRC
+</pre>
+<p>
+The McCarthy 91 function with the argument <code class="verbatim">4</code> evaluates to
+<code class="verbatim">91</code> and with the argument <code class="verbatim">246</code> evaluates to
+<code class="verbatim">236</code>.</p>
+<p>
+Likewise the following are true</p>
+<ul>
+<li><code class="verbatim">call_mcpython91(0)</code> = <code class="verbatim">91</code></li>
+<li><code class="verbatim">call_mcpython91(1)</code> = <code class="verbatim">91</code></li>
+<li><code class="verbatim">call_mcpython91(85)</code> = <code class="verbatim">91</code></li>
+<li><code class="verbatim">call_mcpython91(101)</code> = <code class="verbatim">91</code></li>
+<li><code class="verbatim">call_mcpython91(102)</code> = <code class="verbatim">92</code></li>
+<li><code class="verbatim">call_mcpython91(185)</code> = <code class="verbatim">175</code></li>
+</ul>
+<p>The McCarthy 91 function has the property \( \forall n \in \mathbb{N}
+\), <strong>if</strong> \( n \leq 100 \) <strong>then</strong> \( f(n) = 91 \) <strong>else</strong> \( f(n) = n -
+10 \).</p>
+</div>
+</div>
+<div id="outline-container-headline-7" class="outline-2">
+<h2 id="headline-7">
+Use a Org table as Input
+</h2>
+<div id="outline-text-headline-7" class="outline-text-2">
+<p>
+Take from Org <a href="https://orgmode.org/worg/org-contrib/babel/intro.html#orgd8cf22d">Babel: Introduction</a>.</p>
+<p>
+Given this table of numbers</p>
+<table>
+<tbody>
+<tr>
+<td class="align-right">1</td>
+<td class="align-right">2</td>
+<td class="align-right">3</td>
+<td class="align-right">4</td>
+<td class="align-right">5</td>
+<td class="align-right">6</td>
+<td class="align-right">7</td>
+<td class="align-right">8</td>
+<td class="align-right">9</td>
+<td class="align-right">10</td>
+</tr>
+<tr>
+<td class="align-right">2</td>
+<td class="align-right">4</td>
+<td class="align-right">6</td>
+<td class="align-right">8</td>
+<td class="align-right">10</td>
+<td class="align-right">12</td>
+<td class="align-right">14</td>
+<td class="align-right">16</td>
+<td class="align-right">18</td>
+<td class="align-right">20</td>
+</tr>
+</tbody>
+</table>
+<p>
+It is expressed in an Org file like so</p>
+<pre class="example">
+#+TBLNAME: fibonacci-inputs
+| 1 | 2 | 3 | 4 |  5 |  6 |  7 |  8 |  9 | 10 |
+| 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 | 18 | 20 |
+</pre>
+<p>
+We can use the table named <code class="verbatim">fibonacci-inputs</code> as inputs to a Fibonacci
+function called while we &#34;map&#34; the rows&#39; values to \( f(n) \).</p>
+<div class="src src-elisp">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-elisp" data-lang="elisp"><span class="line"><span class="cl">  <span class="p">(</span><span class="nb">defun</span> <span class="nv">fibonacci</span> <span class="p">(</span><span class="nv">n</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">(</span><span class="nb">if</span> <span class="p">(</span><span class="nf">&lt;</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">)</span> <span class="nv">n</span>
+</span></span><span class="line"><span class="cl">      <span class="p">(</span><span class="nf">+</span> <span class="p">(</span><span class="nv">fibonacci</span> <span class="p">(</span><span class="nf">-</span> <span class="nv">n</span> <span class="mi">1</span><span class="p">))</span> <span class="p">(</span><span class="nv">fibonacci</span> <span class="p">(</span><span class="nf">-</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">)))))</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="p">(</span><span class="nf">mapcar</span> <span class="p">(</span><span class="nb">lambda</span> <span class="p">(</span><span class="nv">row</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">(</span><span class="nf">mapcar</span> <span class="nf">#&#39;</span><span class="nv">fibonacci</span> <span class="nv">row</span><span class="p">))</span> <span class="nv">fib-inputs</span><span class="p">)</span></span></span></code></pre></div>
+</div>
+<p>
+In an Org file that looks like so</p>
+<pre class="example">
+#+NAME: fibonacci-seq
+#+HEADER: :exports both
+#+BEGIN_SRC elisp :var fib-inputs=fibonacci-inputs
+ (defun fibonacci (n)
+   (if (&lt; n 2) n
+     (+ (fibonacci (- n 1)) (fibonacci (- n 2)))))
+
+ (mapcar (lambda (row)
+           (mapcar #&#39;fibonacci row)) fib-inputs)
+#+END_SRC
+</pre>
+<p>
+And produces the following table of Fibonacci numbers</p>
+<table>
+<tbody>
+<tr>
+<td class="align-right">1</td>
+<td class="align-right">1</td>
+<td class="align-right">2</td>
+<td class="align-right">3</td>
+<td class="align-right">5</td>
+<td class="align-right">8</td>
+<td class="align-right">13</td>
+<td class="align-right">21</td>
+<td class="align-right">34</td>
+<td class="align-right">55</td>
+</tr>
+<tr>
+<td class="align-right">1</td>
+<td class="align-right">3</td>
+<td class="align-right">8</td>
+<td class="align-right">21</td>
+<td class="align-right">55</td>
+<td class="align-right">144</td>
+<td class="align-right">377</td>
+<td class="align-right">987</td>
+<td class="align-right">2584</td>
+<td class="align-right">6765</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-headline-8" class="outline-2">
+<h2 id="headline-8">
+Preview Variable or Tangle Expansion/Substitution
+</h2>
+<div id="outline-text-headline-8" class="outline-text-2">
+<p>
+Use <code class="verbatim">C-c C-v v</code> or <code class="verbatim">C-c C-v C-v</code> to preview the expanded content with
+<code class="verbatim">org-babel-expand-src-block</code>.</p>
+</div>
+</div>
+<div id="outline-container-headline-9" class="outline-2">
+<h2 id="headline-9">
+Pascals Triangle in Python
+</h2>
+<div id="outline-text-headline-9" class="outline-text-2">
+<p>
+Taken from <a href="https://www.jstatsoft.org/article/view/v046i03">a journal paper on reproducible research</a>.</p>
+<div class="src src-python">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl">  <span class="k">def</span> <span class="nf">pascals_triangle</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">          <span class="k">return</span> <span class="p">[[</span><span class="mi">1</span><span class="p">]]</span>
+</span></span><span class="line"><span class="cl">      <span class="n">prev_triangle</span> <span class="o">=</span> <span class="n">pascals_triangle</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="n">prev_row</span> <span class="o">=</span> <span class="n">prev_triangle</span><span class="p">[</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">      <span class="n">this_row</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">sum</span><span class="p">,</span> <span class="nb">zip</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">prev_row</span><span class="p">,</span> <span class="n">prev_row</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="n">prev_triangle</span> <span class="o">+</span> <span class="p">[</span><span class="n">this_row</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">pascals_triangle</span><span class="p">(</span><span class="n">n</span><span class="p">)</span></span></span></code></pre></div>
+</div>
+<table>
+<tbody>
+<tr>
+<td class="align-right">1</td>
+<td class="align-right"></td>
+<td class="align-right"></td>
+<td class="align-right"></td>
+<td class="align-right"></td>
+<td class="align-right"></td>
+</tr>
+<tr>
+<td class="align-right">1</td>
+<td class="align-right">1</td>
+<td class="align-right"></td>
+<td class="align-right"></td>
+<td class="align-right"></td>
+<td class="align-right"></td>
+</tr>
+<tr>
+<td class="align-right">1</td>
+<td class="align-right">2</td>
+<td class="align-right">1</td>
+<td class="align-right"></td>
+<td class="align-right"></td>
+<td class="align-right"></td>
+</tr>
+<tr>
+<td class="align-right">1</td>
+<td class="align-right">3</td>
+<td class="align-right">3</td>
+<td class="align-right">1</td>
+<td class="align-right"></td>
+<td class="align-right"></td>
+</tr>
+<tr>
+<td class="align-right">1</td>
+<td class="align-right">4</td>
+<td class="align-right">6</td>
+<td class="align-right">4</td>
+<td class="align-right">1</td>
+<td class="align-right"></td>
+</tr>
+<tr>
+<td class="align-right">1</td>
+<td class="align-right">5</td>
+<td class="align-right">10</td>
+<td class="align-right">10</td>
+<td class="align-right">5</td>
+<td class="align-right">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+  <p class="lastmod">Last modified: 2020-01-20 00:00:00 &#43;0000 UTC</p>
+</div>
+
+    </main>
+    <footer class="colophon container">
+  <p class="copyright">&copy; 2025. All rights reserved.</p>
+  <p class="signature">∃</p>
+</footer>
+
+  </div>
+</div>
+</body>
+</html>

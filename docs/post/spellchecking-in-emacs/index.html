@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+<title>Spellchecking in Emacs &middot; Halting Problems</title>
+
+
+<link rel="stylesheet" href=/css/fonts.css>
+<link rel="stylesheet" href=/css/syntax.css>
+<link rel="stylesheet" href=/css/stix.css>
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144"
+      href=/apple-touch-icon-144-precomposed.png>
+<link rel="shortcut icon" href=/favicon.ico>
+
+
+<meta property="og:url" content="https://haltingproblems.github.io/post/spellchecking-in-emacs/">
+  <meta property="og:site_name" content="Halting Problems">
+  <meta property="og:title" content="Spellchecking in Emacs">
+  <meta property="og:description" content="⚠️ This post was actually written in 2013 and is out of date.
+Emacs doesn’t have a built-in dictionary, but it does have an interface for checking and correcting spelling. The interface is called ispell (the i is for interactive). To use ispell simply run M-x ispell. By itself it’s pretty useless and you’ll get an error in the mini-buffer.
+Searching for program: no such file or directory, ispell As the error says, Emacs need an external program for spellchecking. There are a few options: Ispell, GNU Aspell, or Hunspell. Personally I use Aspell, but Hunspell is also decent from what I understand. Aspell was designed to replace Ispell, so I don’t recommend using Ispell.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2020-01-11T00:00:00+00:00">
+    <meta property="article:modified_time" content="2020-01-11T00:00:00+00:00">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Spellchecking in Emacs">
+  <meta name="twitter:description" content="⚠️ This post was actually written in 2013 and is out of date.
+Emacs doesn’t have a built-in dictionary, but it does have an interface for checking and correcting spelling. The interface is called ispell (the i is for interactive). To use ispell simply run M-x ispell. By itself it’s pretty useless and you’ll get an error in the mini-buffer.
+Searching for program: no such file or directory, ispell As the error says, Emacs need an external program for spellchecking. There are a few options: Ispell, GNU Aspell, or Hunspell. Personally I use Aspell, but Hunspell is also decent from what I understand. Aspell was designed to replace Ispell, so I don’t recommend using Ispell.">
+
+
+</head>
+<body>
+<div class="page">
+  <div class="page-width">
+    <header class="masthead container">
+    <h1 class="masthead-title">
+      <a href=/ title="Home">Halting Problems</a>
+    </h1>
+    
+    <nav class="nav">
+      [
+      
+          <a href="/">Home</a>
+      
+         | <a href="/portfolio/">Portfolio</a>
+      
+         | <a href="/about/">About</a>
+      
+      ]
+    </nav>
+</header>
+
+    <main class="container">
+      
+
+
+
+
+
+
+<div class="post">
+  <header class="post-header">
+    <h1 class="post-title">Spellchecking in Emacs</h1>
+    
+    <div class="post-metadata">
+      <span class="post-date">Jan 11, 2020</span>
+    </div>
+  </header>
+  <p class="message warning">⚠️ This post was <i>actually</i> written in
+<b>2013</b> and is out of date.</p>
+<p>Emacs doesn&rsquo;t have a built-in dictionary, but it does have an
+interface for checking and correcting spelling. The interface is
+called <code>ispell</code> (the <em>i</em> is for interactive). To use
+<code>ispell</code> simply run <kbd>M-x ispell</kbd>. By itself it&rsquo;s
+pretty useless and you&rsquo;ll get an error in the mini-buffer.</p>
+<pre><code>Searching for program: no such file or directory, ispell
+</code></pre>
+<p>As the error says, Emacs need an external program for
+spellchecking. There are a few options:
+<a href="http://ficus-www.cs.ucla.edu/geoff/ispell.html">Ispell</a>, <a href="http://www.gnu.org/software/aspell/">GNU
+Aspell</a>, or
+<a href="http://hunspell.sourceforge.net">Hunspell</a>. Personally I use Aspell,
+but Hunspell is also decent from what I understand. Aspell was
+designed to replace Ispell, so I don&rsquo;t recommend using Ispell.</p>
+<h2 id="installing-aspell">Installing Aspell</h2>
+<p>First obtain <a href="http://www.macports.org">MacPorts</a> for your system if
+you don&rsquo;t already have it. I suppose you could use Homebrew if you are
+so inclined (I&rsquo;m not convinced that its better than MacPorts though).</p>
+<p>Install Aspell:</p>
+<pre><code>$ sudo port install aspell
+</code></pre>
+<p>Then install a language dictionary (probably English):</p>
+<pre><code>$ sudo port install aspell-dict-en
+</code></pre>
+<h2 id="ensuring-emacs-finds-aspell">Ensuring Emacs finds Aspell</h2>
+<p>Emacs.app on Mac doesn&rsquo;t load your environment by default so to make
+aspell work as the ispell dictionary we have to tell Emacs where to
+find the binary. Then we have to tell emacs to use aspell. In your
+<code>.emacs</code> file add the following lines:</p>
+<pre><code>(setq exec-path (append exec-path '(&quot;/opt/local/bin&quot;)))
+(setq-default ispell-program-name &quot;aspell&quot;)
+</code></pre>
+<p>That&rsquo;s it, <kbd>M-x ispell</kbd> should now work.</p>
+
+  <p class="lastmod">Last modified: 2020-01-11 00:00:00 &#43;0000 UTC</p>
+</div>
+
+    </main>
+    <footer class="colophon container">
+  <p class="copyright">&copy; 2025. All rights reserved.</p>
+  <p class="signature">∃</p>
+</footer>
+
+  </div>
+</div>
+</body>
+</html>

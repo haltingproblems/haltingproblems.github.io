@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+<title>Grammar Checking in Emacs &middot; Halting Problems</title>
+
+
+<link rel="stylesheet" href=/css/fonts.css>
+<link rel="stylesheet" href=/css/syntax.css>
+<link rel="stylesheet" href=/css/stix.css>
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144"
+      href=/apple-touch-icon-144-precomposed.png>
+<link rel="shortcut icon" href=/favicon.ico>
+
+
+<meta property="og:url" content="https://haltingproblems.github.io/post/grammar-checking-in-emacs/">
+  <meta property="og:site_name" content="Halting Problems">
+  <meta property="og:title" content="Grammar Checking in Emacs">
+  <meta property="og:description" content="⚠️ This post was actually written in 2013 and is out of date.
+Grammar checking is apparently an error prone task. Or at least it has been claimed: http://faculty.washington.edu/sandeep/check
+Looks like there is GNU diction, but it just highlights potentially misused words. It doesn’t indicate where an error occurred. I’m not comfortable investing much time into getting this working with Emacs. Since there doesn’t appear to be much return for the effort.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2020-01-15T00:00:00+00:00">
+    <meta property="article:modified_time" content="2020-01-15T00:00:00+00:00">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Grammar Checking in Emacs">
+  <meta name="twitter:description" content="⚠️ This post was actually written in 2013 and is out of date.
+Grammar checking is apparently an error prone task. Or at least it has been claimed: http://faculty.washington.edu/sandeep/check
+Looks like there is GNU diction, but it just highlights potentially misused words. It doesn’t indicate where an error occurred. I’m not comfortable investing much time into getting this working with Emacs. Since there doesn’t appear to be much return for the effort.">
+
+
+</head>
+<body>
+<div class="page">
+  <div class="page-width">
+    <header class="masthead container">
+    <h1 class="masthead-title">
+      <a href=/ title="Home">Halting Problems</a>
+    </h1>
+    
+    <nav class="nav">
+      [
+      
+          <a href="/">Home</a>
+      
+         | <a href="/portfolio/">Portfolio</a>
+      
+         | <a href="/about/">About</a>
+      
+      ]
+    </nav>
+</header>
+
+    <main class="container">
+      
+
+
+
+
+
+
+<div class="post">
+  <header class="post-header">
+    <h1 class="post-title">Grammar Checking in Emacs</h1>
+    
+    <div class="post-metadata">
+      <span class="post-date">Jan 15, 2020</span>
+    </div>
+  </header>
+  <p class="message warning">⚠️ This post was <i>actually</i> written in
+<b>2013</b> and is out of date.</p>
+<p>Grammar checking is apparently an error prone task. Or at least it has
+been claimed: <a href="http://faculty.washington.edu/sandeep/check">http://faculty.washington.edu/sandeep/check</a></p>
+<p>Looks like there is <a href="http://www.gnu.org/software/diction/">GNU
+diction</a>, but it just highlights
+potentially misused words. It doesn&rsquo;t indicate where an error
+occurred. I&rsquo;m not comfortable investing much time into getting this
+working with Emacs. Since there doesn&rsquo;t appear to be much return for
+the effort.</p>
+<p>I came across <a href="http://www.emacswiki.org/emacs/BaoqiuCui">Baoqiu Cui</a>'s
+EmacsWiki user page. Baoqui has created a grammar checker for Emacs and
+links to his package from his page. There aren&rsquo;t many details, but the
+screenshots on his user page appear promising. The package can be
+found here <a href="https://code.google.com/archive/p/bcui-emacs/source/default/source">https://code.google.com/archive/p/bcui-emacs/source/default/source</a></p>
+<p>This will be my attempt at getting it working with Emacs.</p>
+<p>According to Baoqiu&rsquo;s
+<a href="http://code.google.com/p/bcui-emacs/source/browse/trunk/grammar/README">README</a>
+file the package uses the <a href="http://www.abisource.com/projects/link-grammar/">Link Grammar
+Parser</a>. The first
+step looks like I should install the Link Grammar Parser. The parser
+is available from <a href="http://www.macports.org">MacPorts</a>.</p>
+<pre><code>$ sudo port install link-grammar
+</code></pre>
+<p>As can bee seen in the
+<a href="http://code.google.com/p/bcui-emacs/source/browse/trunk/grammar/grammar.cc">grammar.cc</a>
+in Baoqui&rsquo;s package we need the link-includes.h file to be on our
+system. Let&rsquo;s verify that the MacPorts package included that file.</p>
+<pre><code>$ port contents link-grammar | grep &quot;link-includes&quot;
+/opt/local/include/link-grammar/link-includes.h
+</code></pre>
+<p>So, yup this is included. The next thing we need to do is download
+Baoqui&rsquo;s package. We&rsquo;ll have to checkout the source code from its repo
+hosted on the now <a href="http://code.google.com">defunct Google Code</a>. I
+like to keep third-party source code in my <code>~/src</code>
+directory.</p>
+<pre><code>$ cd ~/src
+$ svn checkout http://bcui-emacs.googlecode.com/svn/trunk/grammar grammar.svn
+A    grammar.svn/grammar.el
+A    grammar.svn/grammar.cc
+A    grammar.svn/README
+A    grammar.svn/Makefile
+U    grammar.svn
+Checked out revision 51.
+</code></pre>
+<p>We need to fix up the <code>Makefile</code> so that <code>gcc</code>
+knows where to find the include file we installed with MacPorts. This
+is as simple as changing one line in the <code>Makefile</code>.</p>
+<pre><code>INCDIRS = -I. -I/opt/local/include/link-grammar
+</code></pre>
+<p>Next we&rsquo;ll attempt to run make. Hopefully this will compile without
+incident.</p>
+<pre><code>$ make
+g++ -g -I. -I/opt/local/include/link-grammar -c grammar.cc
+In file included from grammar.cc:28:
+/opt/local/include/link-grammar/link-includes.h:16:40: error:
+link-grammar/link-features.h: No such file or directory
+...
+grammar.cc:30: error: expected constructor, destructor, or type conversion before â€˜intâ€™
+make: *** [grammar.o] Error 1
+</code></pre>
+<p>Looks like we got a few screen fulls of errors. Let&rsquo;s investigate the
+first. <code>gcc</code> says it can&rsquo;t find the file
+<code>link-features.h</code>. The first thing I want to do is check
+that it was included when we installed the Link Grammar Parser with
+MacPorts.</p>
+<pre><code>$ port contents link-grammar | grep &quot;link-features&quot;
+  /opt/local/include/link-grammar/link-features.h
+</code></pre>
+<p>Okay, the file exist in the MacPorts package. This means something
+else is wrong. I suspect that the path we changed in the include file
+is wrong for the way <code>link-includes.h</code> is expecting our
+includes to be setup. My guess is that <code>link-includes.h</code>
+references the missing file using its parent directory and then the
+include file, so it would look like <code>#include
+&ldquo;link-grammar/link-features.h&rdquo;</code>. This is a common pattern in
+C. We can easily check this using <code>sed</code>.</p>
+<pre><code>$ sed -n 16,16p /opt/local/include/link-grammar/link-includes.h
+#include &lt;link-grammar/link-features.h&gt;
+</code></pre>
+<p>So, my theory was correct. Well have to fix the <code>Makefile</code>
+and fix the <code>grammar.cc</code> file.</p>
+<p><code>Makefile</code></p>
+<pre><code>INCDIRS = -I. -I/opt/local/include
+</code></pre>
+<p><code>grammar.cc</code></p>
+<pre><code>#include &quot;link-grammar/link-includes.h&quot;
+</code></pre>
+<p>Now we&rsquo;re ready to try running <code>make</code> again. This run
+should compile correctly.</p>
+<pre><code>$ make
+g++ -g -I. -I/opt/local/include -c grammar.cc
+g++ -g -llink-grammar -o grammar grammar.o
+ld: library not found for -llink-grammar
+collect2: ld returned 1 exit status
+make: *** [all] Error 1
+</code></pre>
+<p>This one is easy, it&rsquo;s just a linker error. Since we&rsquo;re using MacPorts
+we need to tell the linker where to find Link Grammar Parser&rsquo;s library
+file. Since we installed the library with MacPorts we know the library
+will be in <code>/opt/local/lib</code>. We just need fix the
+<code>Makefile</code>.</p>
+<p>First change: add a <code>LDFLAGS</code> variable to the
+<code>Makefile</code> right after the <code>INCDIRS</code> variables.</p>
+<pre><code>LDFLAGS=-L/opt/local/lib
+</code></pre>
+<p>Next change the <code>all</code> rule to use the new
+<code>LDFLAGS</code> variable.</p>
+<pre><code>all: $(objects)
+    g++ -g $(LDFLAGS) -llink-grammar -o grammar $(objects)
+</code></pre>
+<p>Now this thing should finally compile.</p>
+<pre><code>$ make
+g++ -g -L/opt/local/lib -llink-grammar -o grammar grammar.o
+</code></pre>
+<p>Awesome! It worked. Now we can move on to getting this working in
+Emacs.</p>
+<p>Copy the files into your <code>~/.emacs.d/site-lisp</code> directory.</p>
+<pre><code> $ mkdir -p ~/.emacs.d/site-lisp/grammar
+ $ cp grammar ~/.emacs.d/site-lisp/grammar
+ $ cp grammar.el ~/.emacs.d/site-lisp/grammar
+</code></pre>
+<p>Then add the following to your <code>~/.emacs</code> file.</p>
+<pre><code>;; Grammar Checker
+(add-to-list 'load-path &quot;~/.emacs.d/site-lisp/grammar&quot;)
+(add-to-list 'exec-path &quot;/Users/eddie/.emacs.d/site-lisp/grammar&quot;)
+(autoload 'grammar-mode &quot;grammar&quot; nil t)
+</code></pre>
+<p>Now we can try out <code>grammar-mode</code>. Switch to a buffer for
+typing (<code>*scratch*</code> is as good as any). Turn on
+<code>grammar-mode</code> by typing <code>M-x grammar-mode</code>. Now
+try typing one of the examples from Baoqiu&rsquo;s user page. You&rsquo;ll have to
+type two spaces or a newline after you type the period to get
+<code>grammar-mode</code> to check the sentence. I did example 2.</p>
+<pre><code>The books is good for beginning reader.
+</code></pre>
+<p>You&rsquo;ll see the words &ldquo;The&rdquo;, &ldquo;books&rdquo;, &ldquo;for&rdquo;, and &ldquo;reader&rdquo; underlined
+with green. This means there are some grammar errors. You can,
+obviously, fix the errors by changing the sentence to the
+following. Remember you need to type two spaces or a newline after you
+type the period.</p>
+<pre><code>The books are good for beginning readers.
+</code></pre>
+<p>You can also use the mode&rsquo;s shortcut to run a check on the sentence
+before or at the current point. The shortcut is <code>C-M-g</code>.</p>
+<p>Caveats: there isn&rsquo;t an interactive mode like <code>ispell</code>. So
+you have to check the grammar as you type it or one sentence at a
+time. You can&rsquo;t just type your document and as a final step check your
+grammar. The other big issue I have is that there is no description of
+the error. The last issue I have, which is least important, is that
+there are no suggestions for correcting the errors.</p>
+
+  <p class="lastmod">Last modified: 2020-01-15 00:00:00 &#43;0000 UTC</p>
+</div>
+
+    </main>
+    <footer class="colophon container">
+  <p class="copyright">&copy; 2025. All rights reserved.</p>
+  <p class="signature">∃</p>
+</footer>
+
+  </div>
+</div>
+</body>
+</html>

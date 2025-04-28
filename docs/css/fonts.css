@@ -1,0 +1,44 @@
+/* selfhost */
+
+/* body text */
+@font-face {
+    font-family: 'STIXTwoText';
+    src: url('../fonts/STIXTwoText[wght].woff2') format('woff2-variations');
+    font-weight: 400 700;
+    font-stretch: 75% 125%;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'STIXTwoText';
+    src: url('../fonts/STIXTwoText-Italic[wght].woff2') format('woff2-variations');
+    font-weight: 400 700;
+    font-stretch: 75% 125%;
+    font-style: italic;
+}
+
+/* code */
+@font-face {
+    font-family: 'DejaVuSansMono';
+    src: url('../fonts/DejaVuSansMono.woff2') format('woff2');
+    font-weight: 400;
+    font-stretch: 50% 125%;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'DejaVuSansMono';
+    src: url('../fonts/DejaVuSansMono-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-stretch: 50% 125%;
+    font-style: bold;
+}
+
+
+@font-face {
+    font-family: 'DejaVuSansMono';
+    src: url('../fonts/DejaVuSansMono-Oblique.woff2') format('woff2');
+    font-weight: 700;
+    font-stretch: 50% 125%;
+    font-style: italic;
+}

@@ -1,0 +1,1453 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Halting Problems </title>
+    <link>https://haltingproblems.github.io/</link>
+    <language>en-us</language>
+    <author></author>
+    <rights>(C) 2025</rights>
+    <updated>2025-04-11 12:27:05 -0500 CDT</updated>
+
+    
+      <item>
+        <title>Swift Package Manager, same as it ever was</title>
+        <link>https://haltingproblems.github.io/post/swiftpm-same-as-it-ever-was/</link>
+        <pubDate>Sat, 05 Apr 2025 10:59:11 CDT</pubDate>
+        <author></author>
+        <guid>https://haltingproblems.github.io/post/swiftpm-same-as-it-ever-was/</guid>
+        <description>&lt;p&gt;
+After working on a framework built with Objective-C, I bundled the
+framework variants into an XCFramework and set up a &lt;code class=&#34;verbatim&#34;&gt;Package.swift&lt;/code&gt;
+manifest for distributing SDK releases. While doing so, I ran into the
+following conundrum:&lt;/p&gt;
+&lt;p&gt;
+I want to make releases like this: bump the version number, make a
+release commit; build the binaries and embed version identifier in in
+the binaries as &lt;code class=&#34;verbatim&#34;&gt;Framework vM.m.p:branch@hash:config&lt;/code&gt; (where &lt;code class=&#34;verbatim&#34;&gt;M&lt;/code&gt; is
+major, &lt;code class=&#34;verbatim&#34;&gt;m&lt;/code&gt; is minor, and &lt;code class=&#34;verbatim&#34;&gt;p&lt;/code&gt; is the patch components of the version
+string); create the release on GitHub with the tag &lt;code class=&#34;verbatim&#34;&gt;vM.m.p&lt;/code&gt; and attach
+the binaries to the GitHub release. Binaries are available in both
+signed and unsigned variants—so no binary voodoo is possible, even
+if that would fix my problem.&lt;/p&gt;
+&lt;p&gt;
+Trouble is the Swift Package Manager expects the package manifest at
+the root of repository named &lt;code class=&#34;verbatim&#34;&gt;Package.swift&lt;/code&gt; and to deliver binaries,
+the package manifest must contain URLs to the ZIP&amp;#39;d binaries and
+checksum of those ZIP files. That means I&amp;#39;d have to make a second
+separate commit to update the package manifest—now the binaries
+point to the commit before the package manifest was updated and the
+manifest tagged at &lt;code class=&#34;verbatim&#34;&gt;M.m.p&lt;/code&gt; actually points to the previous release.&lt;/p&gt;
+&lt;p&gt;
+The framework is a commercial open source product, but I don&amp;#39;t want to
+support peoples &amp;#34;modifications&amp;#34; in the wild. They&amp;#39;re free to do so,
+but if they send a support ticket and the log shows a version
+identifier that didn&amp;#39;t originate in my source tree, good luck.  In
+reality I wouldn&amp;#39;t be so harsh, just send me your changes as a
+PR—then I can help.&lt;/p&gt;
+&lt;p&gt;
+So to fix this I have two bad options, don&amp;#39;t embed the branch and hash
+info for all builds, meaning &lt;code class=&#34;verbatim&#34;&gt;M.m.p&lt;/code&gt; could be any built version from
+&lt;code class=&#34;verbatim&#34;&gt;M.m.p&lt;/code&gt; ahead by some arbitrary number of commits. Or build separate
+Swift PM only binaries with version identifiers of the from &lt;code class=&#34;verbatim&#34;&gt;Framework
+vM.m.p:branch@hash+swiftpm:config&lt;/code&gt;, so I know &lt;code class=&#34;verbatim&#34;&gt;hash&lt;/code&gt; is probably
+equivalent to &lt;code class=&#34;verbatim&#34;&gt;releasetag^&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;
+I picked the latter option. That means Unity, CocoaPods, Carthage, and
+manual integrations will always be uniquely identifiable, but I have
+to do extra work for Swift PM and the version identifier is just a
+crumb trail.&lt;/p&gt;
+&lt;p&gt;
+Other potential options could be putting &lt;code class=&#34;verbatim&#34;&gt;Package.swift&lt;/code&gt; in a separate
+repo, but that sucks too. Or putting &lt;code class=&#34;verbatim&#34;&gt;Package.swift&lt;/code&gt; in an orphaned
+branch, but that would still mean the release tags are wrong for Swift
+PM. Nevertheless, both these options would require telling publishers
+that they have to do &lt;em&gt;extra&lt;/em&gt; stuff to make Swift PM work and that&amp;#39;s
+error prone at best.&lt;/p&gt;
+&lt;p&gt;
+Anyway, just ranting. Unless I&amp;#39;m overlooking and obvious way to break
+a cyclic graph. Package managers are great, until they&amp;#39;re not.&lt;/p&gt;
+</description>
+      </item>
+    
+      <item>
+        <title>Better Scripting</title>
+        <link>https://haltingproblems.github.io/post/better-scripting/</link>
+        <pubDate>Mon, 07 Mar 2022 13:10:31 -0800</pubDate>
+        <author></author>
+        <guid>https://haltingproblems.github.io/post/better-scripting/</guid>
+        <description>
+&lt;p&gt;
+The state of scriptable software is disappointing.&lt;sup class=&#34;footnote-reference&#34;&gt;&lt;a id=&#34;footnote-reference-1&#34; href=&#34;#footnote-1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;
+AppleScript in particular drives me crazy. Its not interactive like
+many other scripting languages. It is overly verbose (and that’s
+coming from someone that loves &lt;a href=&#34;https://objc-lang.org&#34;&gt;ObjC&lt;/a&gt;). Worst of all, it isn’t
+discoverable.&lt;/p&gt;
+&lt;p&gt;
+Apple attempted to fix AppleScript by providing JavaScript bindings.
+Unfortunately, the JS bindings don’t make scripting much better. The
+JS bindings suffer from all the afflictions of AppleScript, but with a
+vaguely JS feel.&lt;/p&gt;
+&lt;p&gt;
+I&amp;#39;m going to ignore that the AppleScript dialect exists and will just
+focus on the JavaScript dialect. Specifically, why I find scripting to
+be a poor user experience.&lt;/p&gt;
+&lt;div id=&#34;outline-container-headline-1&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-1&#34;&gt;
+Basic frustration
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-1&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Typically when scripting you start small and build functionality
+invoking some code and then inspecting the results. Then taking some
+part of the result, invoking some code, and then again inspecting the
+results. You repeat this until arriving at some state or result that
+completes a task.&lt;/p&gt;
+&lt;p&gt;
+Let&amp;#39;s apply this process to exploring and hopefully discovering
+scripting basics. Don&amp;#39;t follow along by typing and running these
+yourself. There&amp;#39;s nothing to be gained by doing so. This is meant to
+be a rhetorical illustration of the poor user experience, nothing
+more.&lt;/p&gt;
+&lt;p&gt;
+Assume we begin armed with just enough knowledge to create a script in
+&lt;a href=&#34;https://support.apple.com/guide/script-editor/welcome/mac&#34;&gt;Script Editor&lt;/a&gt; and to get a scriptable reference to the &lt;a href=&#34;https://support.apple.com/en-us/HT201732&#34;&gt;Finder&lt;/a&gt; (the
+macOS file manager). Running the script produces &lt;code class=&#34;verbatim&#34;&gt;undefined&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;
+&lt;img src=&#34;./basic_F.png&#34; alt=&#34;./basic_F.png&#34; title=&#34;./basic_F.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;
+Great, did it succeed? Is &lt;code class=&#34;verbatim&#34;&gt;undefined&lt;/code&gt; and error? If you&amp;#39;re familiar
+with JavaScript you may quickly realize that &lt;code class=&#34;verbatim&#34;&gt;undefined&lt;/code&gt; is the result
+of evaluating a variable assignment. If we want to inspect &lt;code class=&#34;verbatim&#34;&gt;F&lt;/code&gt;, we
+need to evaluate it. The easy way to do that is to drop the &lt;code class=&#34;verbatim&#34;&gt;var&lt;/code&gt;.
+We&amp;#39;re &lt;em&gt;scripting&lt;/em&gt;, we don&amp;#39;t need no stinking scoped variables!&lt;/p&gt;
+&lt;p&gt;
+&lt;img src=&#34;./unscoped_F.png&#34; alt=&#34;./unscoped_F.png&#34; title=&#34;./unscoped_F.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;
+Well, that doesn&amp;#39;t help. There&amp;#39;s nothing to inspect. There&amp;#39;s no
+additional information.&lt;/p&gt;
+&lt;p&gt;
+So let&amp;#39;s try some good ol&amp;#39; fashion &lt;a href=&#34;https://wiki.c2.com/?PrintfDebugging&#34;&gt;printf debugging&lt;/a&gt;. Adding
+&lt;code class=&#34;verbatim&#34;&gt;console.log(F)&lt;/code&gt; give us&lt;/p&gt;
+&lt;p&gt;
+&lt;img src=&#34;./error_F.png&#34; alt=&#34;./error_F.png&#34; title=&#34;./error_F.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;
+An &lt;strong&gt;ERROR!&lt;/strong&gt; What about &lt;code class=&#34;verbatim&#34;&gt;console.dir()&lt;/code&gt;? You&amp;#39;ll find that it doesn&amp;#39;t
+exist. In fact the only method &lt;code class=&#34;verbatim&#34;&gt;console&lt;/code&gt; has is &lt;code class=&#34;verbatim&#34;&gt;log()&lt;/code&gt; and it doesn&amp;#39;t
+really help with introspection.&lt;/p&gt;
+&lt;p&gt;
+We&amp;#39;re developers, so why not build our own introspection? Let&amp;#39;s try to
+get a list of properties and methods defined on the object.&lt;/p&gt;
+&lt;p&gt;
+&lt;img src=&#34;./keys_F.png&#34; alt=&#34;./keys_F.png&#34; title=&#34;./keys_F.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;
+An &lt;em&gt;empty&lt;/em&gt; array! This is getting old. Let&amp;#39;s agree that there&amp;#39;s no
+obvious way to discover what can be done with the scriptable
+object.&lt;sup class=&#34;footnote-reference&#34;&gt;&lt;a id=&#34;footnote-reference-2&#34; href=&#34;#footnote-2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-2&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-2&#34;&gt;
+Web Inspector chicanery
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-2&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Eventually, either by experimentation, or by stumbling upon it in the
+documentation, you&amp;#39;ll throw a &lt;code class=&#34;verbatim&#34;&gt;debugger&lt;/code&gt; statement in Script Editor
+and make your way to Safari&amp;#39;s Debug menu&lt;/p&gt;
+&lt;p&gt;
+&lt;img src=&#34;./promising_WI.png&#34; alt=&#34;./promising_WI.png&#34; title=&#34;./promising_WI.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;
+Now the Safari Web Inspector looks promising. It allows us to
+&amp;#34;inspect&amp;#34; the JavaScript objects. You can start by evaluating &lt;code class=&#34;verbatim&#34;&gt;this&lt;/code&gt;
+in the console to see what is defined in the global scope. Obviously,
+the thing to try now is evaluating our scriptable reference to Finder,
+&lt;code class=&#34;verbatim&#34;&gt;F&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;
+&lt;img src=&#34;./not_so_F.png&#34; alt=&#34;./not_so_F.png&#34; title=&#34;./not_so_F.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;
+More disappointment. This just gave us the generic JavaScript value
+for &lt;code class=&#34;verbatim&#34;&gt;.toString()&lt;/code&gt;. We didn&amp;#39;t get an interactive tree of the properties
+like we did by evaluating &lt;code class=&#34;verbatim&#34;&gt;this&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;
+Scroll up to find our previous &lt;code class=&#34;verbatim&#34;&gt;this&lt;/code&gt; or type it again and manually
+look for the &lt;code class=&#34;verbatim&#34;&gt;F&lt;/code&gt; subtree. Expanding the &lt;code class=&#34;verbatim&#34;&gt;F&lt;/code&gt; subtree, we can &lt;em&gt;finally&lt;/em&gt;
+learn what we can do with our scriptable object.&lt;/p&gt;
+&lt;p&gt;
+&lt;img src=&#34;./subtree_F.png&#34; alt=&#34;./subtree_F.png&#34; title=&#34;./subtree_F.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;
+If we further expand &lt;code class=&#34;verbatim&#34;&gt;F&lt;/code&gt;&amp;#39;s Object Prototype subtree we can discover
+even more functionality.&lt;/p&gt;
+&lt;p&gt;
+&lt;img src=&#34;./subtree_OP.png&#34; alt=&#34;./subtree_OP.png&#34; title=&#34;./subtree_OP.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;
+You may notice a stop sign with an exclamation will appear as you
+explore the object tree. Click the stop sign (1) and you&amp;#39;ll jump to a
+bunch of errors. Click &amp;#34;All&amp;#34; (2) to restore the default Console
+filter.&lt;/p&gt;
+&lt;p&gt;
+&lt;img src=&#34;./errors_WI.png&#34; alt=&#34;./errors_WI.png&#34; title=&#34;./errors_WI.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;
+As you explore object trees, evaluate expressions, and otherwise use
+the Web Inspector these errors will bombard your session. As should be
+clear by now, scripting is a terrible user experience. Things don&amp;#39;t
+evaluate to themselves, you have to use &lt;code class=&#34;verbatim&#34;&gt;.properties()&lt;/code&gt; and &lt;code class=&#34;verbatim&#34;&gt;.get()&lt;/code&gt;.
+The Inspector is an afterthought and cumbersome, not to mention it is
+component of a completely separate app.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-3&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-3&#34;&gt;
+A better scripting environment
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-3&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+It is possible to create a better scripting environment. Step one:
+create an AppleScript dialect that is easy to explore and interact
+with. Step two: build a &lt;a href=&#34;https://docs.racket-lang.org/drracket/interface-essentials.html&#34;&gt;DrRacket&lt;/a&gt;-style&lt;sup class=&#34;footnote-reference&#34;&gt;&lt;a id=&#34;footnote-reference-3&#34; href=&#34;#footnote-3&#34;&gt;3&lt;/a&gt;&lt;/sup&gt; app with an editor on top
+and interactive console on the bottom. Bonus: build a debugger
+directly into the editor/console and ensure that the Web Inspector is
+available too and works as nicely as it does for the web.&lt;/p&gt;
+&lt;p&gt;
+I started a project to do just that. The project is called &lt;a href=&#34;https://github.com/SillyUtility/Rx-Editor&#34;&gt;Rx Editor&lt;/a&gt;.
+The AppleScript dialect, Rx&lt;sup class=&#34;footnote-reference&#34;&gt;&lt;a id=&#34;footnote-reference-4&#34; href=&#34;#footnote-4&#34;&gt;4&lt;/a&gt;&lt;/sup&gt;, is around 50% to 80% complete. The
+app is around 1% complete, debugger 0% complete, Web Inspector
+integration is free and tracks the development of Rx (so it is 50-80%
+complete as well).&lt;/p&gt;
+&lt;p&gt;
+If you evaluate &lt;code&gt;F = new Application(&amp;#34;com.apple.Finder&amp;#34;)&lt;/code&gt; in the Web
+Inspector while inspecting a Rx context you&amp;#39;ll get the expected object
+tree.&lt;/p&gt;
+&lt;p&gt;
+&lt;img src=&#34;./rx_obj_tree_F.png&#34; alt=&#34;./rx_obj_tree_F.png&#34; title=&#34;./rx_obj_tree_F.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;
+You can explore the object graph without seeing numerous errors. The
+Objects are typed and structured logically. Subtrees in the graph are
+properly expanded with no need for &lt;code class=&#34;verbatim&#34;&gt;.get()&lt;/code&gt; or &lt;code class=&#34;verbatim&#34;&gt;.properties()&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;
+&lt;img src=&#34;./rx_obj_subtree_F.png&#34; alt=&#34;./rx_obj_subtree_F.png&#34; title=&#34;./rx_obj_subtree_F.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;
+Evaluating an object does exactly what you&amp;#39;d expect. Using
+&lt;code class=&#34;verbatim&#34;&gt;console.log()&lt;/code&gt; does what you&amp;#39;d expect.&lt;/p&gt;
+&lt;p&gt;
+&lt;img src=&#34;./rx_eval_or_log_F.png&#34; alt=&#34;./rx_eval_or_log_F.png&#34; title=&#34;./rx_eval_or_log_F.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;
+And this is what the Rx Editor application looks like (at least for
+now).&lt;/p&gt;
+&lt;p&gt;
+&lt;img src=&#34;./rx_editor_screenshot.jpg&#34; alt=&#34;./rx_editor_screenshot.jpg&#34; title=&#34;./rx_editor_screenshot.jpg&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;
+It is far from complete, but I&amp;#39;m making it public now. Check out &lt;a href=&#34;https://github.com/SillyUtility/Rx-Editor&#34;&gt;Rx
+Editor on GitHub&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-4&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-4&#34;&gt;
+Footnotes
+&lt;/h2&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+&lt;hr class=&#34;footnotes-separatator&#34;&gt;
+&lt;div class=&#34;footnote-definitions&#34;&gt;
+&lt;div class=&#34;footnote-definition&#34;&gt;
+&lt;sup id=&#34;footnote-1&#34;&gt;&lt;a href=&#34;#footnote-reference-1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;
+&lt;div class=&#34;footnote-body&#34;&gt;
+&lt;p&gt;My perspective is almost entirely based on recent macOS
+versions and first-party applications. However, as far as I can tell
+Windows and Linux (including the open source world at large) isn&amp;#39;t any
+better.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnote-definition&#34;&gt;
+&lt;sup id=&#34;footnote-2&#34;&gt;&lt;a href=&#34;#footnote-reference-2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;
+&lt;div class=&#34;footnote-body&#34;&gt;
+&lt;p&gt;If you&amp;#39;re a seasoned AppleScripter and you want to scream at
+me, remember we&amp;#39;re assuming we don&amp;#39;t know anything beyond getting the
+initial reference to the scriptable object.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnote-definition&#34;&gt;
+&lt;sup id=&#34;footnote-3&#34;&gt;&lt;a href=&#34;#footnote-reference-3&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;
+&lt;div class=&#34;footnote-body&#34;&gt;
+&lt;p&gt;Racket didn&amp;#39;t invent this style of editor, but it is possibly
+the most familiar incarnation to the most people.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnote-definition&#34;&gt;
+&lt;sup id=&#34;footnote-4&#34;&gt;&lt;a href=&#34;#footnote-reference-4&#34;&gt;4&lt;/a&gt;&lt;/sup&gt;
+&lt;div class=&#34;footnote-body&#34;&gt;
+&lt;p&gt;I&amp;#39;m not 100% sold on calling the dialect Rx, but the editor
+&lt;strong&gt;is&lt;/strong&gt; Rx Editor.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+      </item>
+    
+      <item>
+        <title>Vacuous Truths</title>
+        <link>https://haltingproblems.github.io/post/vacuous-truths/</link>
+        <pubDate>Sat, 22 Jan 2022 05:49:26 -0800</pubDate>
+        <author></author>
+        <guid>https://haltingproblems.github.io/post/vacuous-truths/</guid>
+        <description>
+&lt;p class=&#34;message warning&#34;&gt;⚠️ This homepage is no longer named Vacuous
+Truth. I let the domain expire. So this post is now apropos of nothing.&lt;/p&gt;
+&lt;p&gt;
+I want to explain why this homepage is named Vacuous Truth. It is
+because I love the concept of vacuously true logical statements.
+Besides the fact that a vacuous truth is a part of math and
+logic—which makes me love it by default—I especially love this concept
+because it is the basis of &amp;#34;smartassery.&amp;#34;&lt;/p&gt;
+&lt;div id=&#34;outline-container-headline-1&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-1&#34;&gt;
+A simple example
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-1&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;img src=&#34;runningman.svg&#34; alt=&#34;runningman.svg&#34; title=&#34;A sketch of a running man&#34; class=&#34;width-50p center&#34;/&gt;
+&lt;p&gt;
+It is weird to think about jackass middle school children leveraging a
+concept they likely have not learned about and perhaps never will. But
+it happens to be true. When a teacher tells a student &amp;#34;no running in
+the halls&amp;#34; a smartass doesn&amp;#39;t see this as a rule but as an
+opportunity. A teacher means to imply no running in all the places
+where it may be dangerous including the halls, but the smartass hears
+that they may run in all places except the halls. The enterprising
+smartass will immediately put this to the test by running in a
+classroom, a stairwell, or on the roof.&lt;/p&gt;
+&lt;p&gt;
+A smartass can not help but test the logically flawed rule the teacher
+has made. In our example running on the roof is following the rule and
+a smartass must use this as a flex to put the teacher in their place.
+The rule as constructed by the teacher is the proposition &lt;em&gt;P&lt;/em&gt; &amp;#34;if in
+the hall&amp;#34; and the conclusion &lt;em&gt;Q&lt;/em&gt; &amp;#34;running is not permitted.&amp;#34; When &lt;em&gt;P&lt;/em&gt;
+is false there&amp;#39;s nothing the statement logically says about running,
+so by running on the roof the statement is true and the rule has been
+followed. Obviously, this smartass student deserves praise for
+following the rules. Not so fast smart guy!&lt;/p&gt;
+&lt;p&gt;
+To the student&amp;#39;s dismay, this behavior is rarely praised. The teacher
+implicitly knows, as do most responsible adults, that the rule was
+only followed because in the case of running on the roof (i.e. not in
+the hall) the statement is vacuously true and rules followed vacuously
+are subject to another rule: smartasses will be disciplined.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-2&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-2&#34;&gt;
+A crass example
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-2&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;img src=&#34;knife.svg&#34; alt=&#34;knife.svg&#34; title=&#34;A sketch of a knife&#34; class=&#34;width-75p center&#34;/&gt;
+&lt;p&gt;
+The fun with vacuous truths never ends. Consider the statement &amp;#34;I do
+all my murders with that knife.&amp;#34; If I was being interrogated by the
+police and they brought a knife to the interrogation room to demand I
+admit to killing someone with the knife I would instinctively want to
+respond:&lt;/p&gt;
+&lt;p&gt;
+&lt;em&gt;&lt;strong&gt;I do all my murders with that knife!&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;
+It would be so tempting. Thankfully as an adult, I&amp;#39;ve learned the hard way
+that smartasses will be disciplined. Indeed it will be better for
+everyone involved if I do what any good lawyer would instruct and
+&lt;a href=&#34;https://www.youtube.com/watch?v=d-7o9xYp7eE&#34;&gt;don&amp;#39;t talk to the police&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;
+I know I&amp;#39;ve picked a crass example, but it makes this all the more fun
+since the statement at face value would be so shocking. Not only did I
+murder with the knife, but I&amp;#39;ve confessed to multiple murders. Cops,
+like teachers, don&amp;#39;t appreciate clever smartasses and have certainly
+never been introduced to the universal quantifier.&lt;/p&gt;
+&lt;p&gt;
+This little joke would probably force me to attempt teaching
+mathematical logic to the police, jury, and parole board. All the
+while I could take solace in how clever I was in phrasing my denial
+while sitting in my prison cell.&lt;/p&gt;
+&lt;p&gt;
+The domain of discourse that I constructed is the set &lt;em&gt;M&lt;/em&gt; of every
+murder I&amp;#39;ve committed, since I&amp;#39;ve never committed a murder &lt;em&gt;M&lt;/em&gt; is
+empty, thus it is true that all the murders were done with the knife
+because I&amp;#39;ve never murdered.&lt;/p&gt;
+&lt;p&gt;
+It is also true that I always murder on Tufurnetherwanday (the day
+between Tuesday and Wednesday) at precisely the 25th hour in the
+township of New Smartassastan.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+      </item>
+    
+      <item>
+        <title>The Problem with Homebrew</title>
+        <link>https://haltingproblems.github.io/post/homebrew-problems/</link>
+        <pubDate>Tue, 02 Nov 2021 00:00:00 UTC</pubDate>
+        <author></author>
+        <guid>https://haltingproblems.github.io/post/homebrew-problems/</guid>
+        <description>
+&lt;p&gt;
+I need to spill the tea on the Homebrew package manager, but first
+some praise. Homebrew is a really good name. It&amp;#39;s cute! Its chock-full
+of Apple history: the &lt;a href=&#34;https://americanhistory.si.edu/collections/search/object/nmah_1692121&#34;&gt;Apple I&lt;/a&gt; computer was introduced at &lt;a href=&#34;https://www.computerhistory.org/revolution/personal-computers/17/312&#34;&gt;the Homebrew
+Computer Club&lt;/a&gt;.&lt;/p&gt;
+&lt;img src=&#34;./hb-club.jpg&#34; alt=&#34;./hb-club.jpg&#34; title=&#34;Jobs &amp;amp; Woz at the Homebrew Computer Club&#34; class=&#34;center&#34;/&gt;
+&lt;p&gt;
+The name evokes nostalgia, I&amp;#39;m getting a warm feeling just thinking
+about retro computers. The clickety-clack of the mechanical keys, the
+low-frequency grind of floppy drive, the smell of the electronics and
+the printed manuals. Even Terminal.app ships with a retro theme called
+Homebrew.&lt;/p&gt;
+&lt;img src=&#34;./homebrew-theme.jpg&#34; alt=&#34;./homebrew-theme.jpg&#34; title=&#34;Screenshot of Terminal.app show the Homebrew theme&#34; class=&#34;center&#34;/&gt;
+&lt;p&gt;
+Homebrew also has a great out-of-the-box experience. Installation is a
+single command you paste into your shell. By default, there’s no
+configuration to fiddle with, no path to set, and no permissions to
+worry about. I believe this handful of of positives account for its
+popularity, however simple they might be.&lt;/p&gt;
+&lt;p&gt;
+With that said, this post presents &lt;em&gt;some&lt;/em&gt; of the problems I’ve
+encountered using Homebrew. They&amp;#39;re not the biggest problems or the
+most egregious, but I think they&amp;#39;re the easiest to understand and the
+most relatable.&lt;/p&gt;
+&lt;div id=&#34;outline-container-headline-1&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-1&#34;&gt;
+Cutesy names gone wild
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-1&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+The cutesy name by itself is fine. But when you over-extend the
+metaphor to actual home beer brewing (&lt;a href=&#34;https://americanhistory.si.edu/blog/papazian&#34;&gt;thanks, Jimmy Carter&lt;/a&gt;) and force
+beer nouns onto a package management system, things quickly go off the
+rails.&lt;/p&gt;
+&lt;p&gt;
+Thus, we have Casks, (poured) Bottles, Taps, Kegs, Formulae, Recipes,
+Cellar, Caskroom, and others. I have no idea what “key only” is
+supposed to mean. I kind of get &amp;#34;taps&amp;#34;, but these terms are mostly
+baffling.&lt;/p&gt;
+&lt;p&gt;
+&lt;em&gt;Stop it!&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;
+It’s &lt;strong&gt;package manager&lt;/strong&gt;. It installs &lt;strong&gt;packages&lt;/strong&gt; from &lt;strong&gt;source&lt;/strong&gt; or as
+&lt;strong&gt;binaries&lt;/strong&gt;. Packages are organized and indexed in a &lt;strong&gt;package
+repository&lt;/strong&gt;. Use the nomenclature that we have all agreed on.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-2&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-2&#34;&gt;
+Package managers package packages
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-2&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+It might seem obvious, but a package managers purpose is to package
+and manage packages for you. The unforgivable sin of a package manager
+is to not package something you need or worse to print a cop-out when
+you request a package be installed.&lt;/p&gt;
+&lt;p&gt;
+When I evaluate a package manager I check for a few packages: it needs
+to have Emacs and its variants, CLI only, the NextSTEP (Emacs.app
+package) variant, X11 variant, etc; it needs to have XQuartz on a Mac
+and X11 on Linux, obviously; it should package TeX Live too.&lt;/p&gt;
+&lt;p&gt;
+Screw any of this up and you don’t have a package manager suitable for
+my use case. When Homebrew first came on the scene I recall at least
+TeX Live and XQuartz not being available. I seem to remember something
+wrong with Emacs too, maybe it didn&amp;#39;t have the NS/app variant.&lt;sup class=&#34;footnote-reference&#34;&gt;&lt;a id=&#34;footnote-reference-1&#34; href=&#34;#footnote-1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;div id=&#34;outline-container-headline-3&#34; class=&#34;outline-3&#34;&gt;
+&lt;h3 id=&#34;headline-3&#34;&gt;
+The case of TeX Live
+&lt;/h3&gt;
+&lt;div id=&#34;outline-text-headline-3&#34; class=&#34;outline-text-3&#34;&gt;
+&lt;p&gt;
+Historically Homebrew would not install TeX Live.&lt;/p&gt;
+&lt;div class=&#34;src src-text&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ brew install tex-live
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Installing TeX from source is weird and gross, requires a lot of
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;patches, and only builds 32-bit (and thus can&amp;#39;t use Homebrew deps on
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Snow Leopard.)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;We recommend using a MacTeX distribution: http://www.tug.org/mactex/&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Homebrew no longer prints this cop-out. It may seem unfair to bring up
+Homebrew&amp;#39;s historic behavior, but I think it highlights a flaw in the
+philosophy of Homebrew that persist to this day. Homebrew punts on
+anything that&amp;#39;s tricky. Building software is weird and gross? As a
+package manager, that&amp;#39;s literally your job!&lt;/p&gt;
+&lt;p&gt;
+Nowadays, instead of a cop-out, Homebrew directs you to use the Cask
+system. Homebrew hard-codes two packages for blanket refusal, the
+first is Xcode which is understandable (although disappointing), the
+second is TeX.&lt;/p&gt;
+&lt;div class=&#34;src src-text&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ brew install tex-live
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Warning: No available formula or cask with the name &amp;#34;tex-live&amp;#34;.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;==&amp;gt; Searching for similarly named formulae...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Error: No similarly named formulae found.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;There are three versions of MacTeX.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Full installation:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  brew install --cask mactex
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Full installation without bundled applications:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  brew install --cask mactex-no-gui
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Minimal installation:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  brew install --cask basictex&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Casks, however, come with their own set of problems. A Cask, as far as
+I can tell, is a Homebrew abstraction over the &lt;code class=&#34;verbatim&#34;&gt;installer&lt;/code&gt; program and
+the &lt;em&gt;installation package&lt;/em&gt; format (&lt;code class=&#34;verbatim&#34;&gt;.pkg&lt;/code&gt; &amp;amp; &lt;code class=&#34;verbatim&#34;&gt;.mpkg&lt;/code&gt;). That means the
+underlying implementation is closed source and the package are macOS
+only. Consequently, even if the upstream software is cross-platform,
+the Cask is not—not even on Linuxbrew.&lt;sup class=&#34;footnote-reference&#34;&gt;&lt;a id=&#34;footnote-reference-2&#34; href=&#34;#footnote-2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; This also means the
+packages are binary only and any compile-time options are
+inaccessible.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-4&#34; class=&#34;outline-3&#34;&gt;
+&lt;h3 id=&#34;headline-4&#34;&gt;
+What the deal with macFUSE?
+&lt;/h3&gt;
+&lt;div id=&#34;outline-text-headline-4&#34; class=&#34;outline-text-3&#34;&gt;
+&lt;p&gt;
+At some point you may want to install a macFUSE filesystem like
+&lt;code class=&#34;verbatim&#34;&gt;bindfs&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;src src-text&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ brew install bindfs
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Error: bindfs has been disabled because it requires
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;closed-source macFUSE!&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+I don&amp;#39;t care if it is closed-source. Homebrew has a lot of other
+closed-source software available, why is macFUSE different?&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-5&#34; class=&#34;outline-3&#34;&gt;
+&lt;h3 id=&#34;headline-5&#34;&gt;
+Other deliberately disabled package
+&lt;/h3&gt;
+&lt;div id=&#34;outline-text-headline-5&#34; class=&#34;outline-text-3&#34;&gt;
+&lt;p&gt;
+There are about 120 additional disabled packages. Many of these are
+FUSE based file systems and others are for reasons like
+&amp;#34;unmaintained,&amp;#34; &amp;#34;doesn’t compile,&amp;#34; or &amp;#34;license issues.&amp;#34; One is left
+wondering why a package manager should make decisions about licensing
+for you? Especially Homebrew, that facilitates installing
+closed-source binaries, it isn&amp;#39;t like it&amp;#39;s a GNU package manger with a
+strict ideology.&lt;/p&gt;
+&lt;p&gt;
+Anything marked &amp;#34;doesn&amp;#39;t compile&amp;#34; makes me question if this is a case
+of something being truly broken or a case of &amp;#34;installing […] from
+source is weird and gross?&amp;#34; I suspect the latter.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-6&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-6&#34;&gt;
+Forced Upgrades
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-6&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+There’s nothing I hate more than software that tries to &amp;#34;help,&amp;#34; but
+gets it wrong. That’s the opposite of helpful—that’s Clippy.&lt;/p&gt;
+&lt;img src=&#34;./clippy.png&#34; alt=&#34;./clippy.png&#34; title=&#34;Clippy being a d*ck&#34; class=&#34;center&#34;/&gt;
+&lt;p&gt;
+Homebrew will update itself and upgrade all your outdated packages if
+you make the unfortunate decision to perform the innocuous task of
+installing an unrelated package. It will do this even when installing
+a package that has no dependencies in common with your installed
+packages.&lt;/p&gt;
+&lt;p&gt;
+I know some people will claim that this is no big deal or even
+desirable in the age of continuous updates and moving targets. Maybe
+to understand the peril you need an update to break your system.&lt;/p&gt;
+&lt;p&gt;
+There is a legitimate argument for updating and upgrading when new
+packages are installed, but why not notify the user that continuing
+will update and upgrade other packages? Give the user a way to back out
+before performing sweeping changes that may break their setup.&lt;/p&gt;
+&lt;p&gt;
+Yes, there is an environment variable &lt;code class=&#34;verbatim&#34;&gt;HOMEBREW_NO_AUTO_UPDATE&lt;/code&gt;. But
+you&amp;#39;ll only go looking for it &lt;em&gt;after&lt;/em&gt; Homebrew has borked your system
+once or twice.&lt;/p&gt;
+&lt;p&gt;
+Configuration via environment variables have risks too. If you set
+&lt;code class=&#34;verbatim&#34;&gt;HOMEBREW_NO_AUTO_UPDATE&lt;/code&gt; in your Bash &lt;code class=&#34;verbatim&#34;&gt;.profile&lt;/code&gt; then switch to Zsh
+without porting all of your &lt;code class=&#34;verbatim&#34;&gt;.profile&lt;/code&gt; to &lt;code class=&#34;verbatim&#34;&gt;.zshrc&lt;/code&gt;, the next time you
+run &lt;code class=&#34;verbatim&#34;&gt;brew&lt;/code&gt; you could be in a world of hurt. This is not just a
+hypothetical, I just did it to myself:&lt;/p&gt;
+&lt;p&gt;
+I set my login shell to tcsh and a few days later tried to install
+&lt;a href=&#34;https://www.shellcheck.net&#34;&gt;ShellCheck&lt;/a&gt; for the making sure my &lt;code class=&#34;verbatim&#34;&gt;#!/bin/sh&lt;/code&gt; scripts are POSIX
+compatible (it seemed especially prudent while running a non-Bourne
+shell).&lt;/p&gt;
+&lt;p&gt;
+The &lt;code class=&#34;verbatim&#34;&gt;HOMEBREW_NO_AUTO_UPDATE&lt;/code&gt; environment variable does not stop every
+forced upgrade either, so with or without it set &lt;code class=&#34;verbatim&#34;&gt;brew install&lt;/code&gt; is a
+ticking time bomb.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-7&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-7&#34;&gt;
+Homebrew is a little slow
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-7&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Homebrew is mostly Ruby. The &lt;code class=&#34;verbatim&#34;&gt;brew&lt;/code&gt; command is implemented as a Bash
+script that execs (or sources) additional Bash scripts and Ruby
+scripts, but that&amp;#39;s an implementation detail. There&amp;#39;s a few Swift
+files too. But since it is mostly Ruby it is slow. You can expect
+about 1 second of wall clock overhead for any invocation of &lt;code class=&#34;verbatim&#34;&gt;brew&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;src src-text&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ time brew help
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;real	0m1.869s&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Repeat invocations of &lt;code class=&#34;verbatim&#34;&gt;brew&lt;/code&gt; do speed up thanks to &lt;a href=&#34;https://github.com/Shopify/bootsnap&#34;&gt;bootsnap&lt;/a&gt;, but not
+by much.&lt;/p&gt;
+&lt;div class=&#34;src src-text&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ time brew help
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;real	0m1.041s&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Search is incredibly slow&lt;/p&gt;
+&lt;div class=&#34;src src-text&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ time brew search git
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;real	0m13.542s&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+At the time of this writing Homebrew returns 147 packages for the
+search and it takes 13 and ½ seconds.&lt;sup class=&#34;footnote-reference&#34;&gt;&lt;a id=&#34;footnote-reference-3&#34; href=&#34;#footnote-3&#34;&gt;3&lt;/a&gt;&lt;/sup&gt; For contrast, the
+same search with MacPorts:&lt;/p&gt;
+&lt;div class=&#34;src src-text&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ time port search git
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;real	0m0.702s&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+MacPorts returns 295 packages and takes around 1 second.&lt;sup class=&#34;footnote-reference&#34;&gt;&lt;a id=&#34;footnote-reference-4&#34; href=&#34;#footnote-4&#34;&gt;4&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-8&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-8&#34;&gt;
+Search in name only
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-8&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+What really irks me isn&amp;#39;t that search is slow, it&amp;#39;s the terse output
+and lack of long descriptions. It would be nice if search would, at
+least optionally, display additional information such as the version
+and short description.&lt;/p&gt;
+&lt;p&gt;
+There is a &lt;code class=&#34;verbatim&#34;&gt;--desc&lt;/code&gt; option, but it changes the search semantics rather
+that optionally displaying some additional information about the
+packages returned by the query. It broadens the search to include
+descriptions. This, however, is absurd for Homebrew because many
+package have no description or the descriptions are so short they
+don’t provide additional keywords to match against.&lt;/p&gt;
+&lt;p&gt;
+Many other package managers have categories and long descriptions of
+packages that aid package discovery. Homebrew&amp;#39;s vim description is &amp;#34;Vi
+&amp;#39;workalike&amp;#39; with many additional features.&amp;#34; If somebody wanted to see
+every text editor in Homebrew the search &lt;code class=&#34;verbatim&#34;&gt;brew search --desc editor&lt;/code&gt;
+will not return vim. In fact, this search skips many available text
+editors because nobody thought to include &amp;#34;text&amp;#34; or &amp;#34;editor&amp;#34; in the
+descriptions. Contrast Homebrew’s vim description with the description
+in FreeBSD Ports:&lt;/p&gt;
+&lt;div class=&#34;src src-text&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Vim is a highly configurable text editor built to enable efficient text editing.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;It is an improved version of the vi editor distributed with most UNIX systems.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Vim is often called a &amp;#34;programmer&amp;#39;s editor,&amp;#34; and so useful for programming that
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;many consider it an entire IDE. It&amp;#39;s not just for programmers, though. Vim is
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;perfect for all kinds of text editing, from composing email to editing
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;configuration files.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;FreeBSD has the following Vim packages:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;* vim: Console-only Vim (vim binary) with all runtime files
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;* vim-gtk3, -gtk2, -athena, -motif, -x11: Console Vim plus a GUI (gvim binary)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;* vim-tiny: Vim binary only, with no runtime files. Not useful for most people;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  intended for minimal (ex. jail) installations
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;WWW: http://www.vim.org/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;WWW: https://github.com/vim/vim&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+The FreeBSD Ports&amp;#39; description contains a good set of keywords to
+match against: text, editor, editing, vi, programmer, programming,
+IDE, composing, email, files.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-9&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-9&#34;&gt;
+Poor package info
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-9&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+One consequence of the bad search interface is that I always find
+myself having to use &lt;code class=&#34;verbatim&#34;&gt;brew info&lt;/code&gt; to ensure I’m installing the correct
+package and because there’s no long description, I almost always find
+myself using &lt;code class=&#34;verbatim&#34;&gt;brew home&lt;/code&gt; as well. The repeat &lt;code class=&#34;verbatim&#34;&gt;brew search&lt;/code&gt;, &lt;code class=&#34;verbatim&#34;&gt;brew
+info&lt;/code&gt;, &lt;code class=&#34;verbatim&#34;&gt;brew home&lt;/code&gt; cycles are painful and clunky. The pain is
+compounded by Homebrew&amp;#39;s slowness.&lt;/p&gt;
+&lt;p&gt;
+Homebrew’s info command format is crowded, hard to read, and contains
+a lot of extraneous information. Keeping with our vim theme, here is
+vim’s info as presented by Homebrew:&lt;/p&gt;
+&lt;div class=&#34;src src-text&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ brew info vim
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;vim: stable 8.2.3400 (bottled), HEAD
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Vi &amp;#39;workalike&amp;#39; with many additional features
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;https://www.vim.org/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Conflicts with:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ex-vi (because vim and ex-vi both install bin/ex and bin/view)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  macvim (because vim and macvim both install vi* binaries)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Not installed
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;From: https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/vim.rb
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;License: Vim
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;==&amp;gt; Dependencies
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Required: gettext ✔, lua ✘, ncurses ✔, perl ✔, python@3.9 ✔, ruby ✘
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;==&amp;gt; Options
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;--HEAD
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	Install HEAD version
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;==&amp;gt; Analytics
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;install: 64,670 (30 days), 176,361 (90 days), 958,195 (365 days)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;install-on-request: 64,634 (30 days), 176,252 (90 days), 955,894 (365 days)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;build-error: 24 (30 days)&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Now contrast Homebrew’s info formatting with MacPort&amp;#39;s:&lt;/p&gt;
+&lt;div class=&#34;src src-text&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;% port info vim
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;vim @8.2.2683 (editors)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Variants:        athena, big, cscope, gtk2, gtk3, [+]huge, lua, motif,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		 perl, python27, python36, python37, python38, python39,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		 ruby, ruby18, ruby19, ruby20, ruby21, ruby22, ruby23,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		 ruby24, ruby25, small, tcl, tiny, x11, xim
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Description:     Vim is an advanced text editor that seeks to provide the
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		 power of the de-facto Unix editor &amp;#39;Vi&amp;#39;, with a more
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		 complete feature set.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Homepage:        https://www.vim.org/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Library Dependencies: ncurses, gettext, libiconv
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Platforms:       darwin, freebsd
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;License:         Vim and GPL-2+
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Maintainers:     Email: raimue [at] macports.org, GitHub: raimue&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+It’s incredible how a little formatting and white space beats color
+and dingbats.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-10&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-10&#34;&gt;
+Conclusion
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-10&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Homebrew has some good qualities, but they can be easily replicated by
+existing package manager or new package managers. Creating a package
+manager with a good cutesy name. Now that&amp;#39;s the hard part. Trust me,
+Windows has a package manger called &lt;a href=&#34;https://chocolatey.org&#34;&gt;Chocolatey&lt;/a&gt; 🤢.&lt;/p&gt;
+&lt;p&gt;
+There&amp;#39;s no good reason to stretch a metaphor so thin as to give
+components of your package manager confusing names. Additionally a
+package manager should be good at building software and should have a
+plentiful package repository. Homebrew fails all of these.&lt;/p&gt;
+&lt;p&gt;
+Don&amp;#39;t automatically perform actions that can take a long time or that
+can break stuff. Especially don&amp;#39;t update and upgrade packages unless
+at user&amp;#39;s request or with the user&amp;#39;s consent.&lt;/p&gt;
+&lt;p&gt;
+Slow isn&amp;#39;t the worst thing for a package manager, but if you have to
+be slow—at least make sure you make up for it in some way.&lt;/p&gt;
+&lt;p&gt;
+Now for the kicker, I&amp;#39;m still using Homebrew, at least for now. I&amp;#39;ve
+tried so many package managers over the years and there&amp;#39;s no
+one-true-package-manager. They all do things that are baffling and all
+do things that are genius. My ideal package manager would take the
+best of &lt;a href=&#34;https://wiki.debian.org/PackageManagement&#34;&gt;APT&lt;/a&gt;, &lt;a href=&#34;https://www.macports.org&#34;&gt;MacPorts&lt;/a&gt;, &lt;a href=&#34;https://www.pkgsrc.org&#34;&gt;pkgsrc&lt;/a&gt;, &lt;a href=&#34;https://github.com/NixOS/nixpkgs&#34;&gt;Nix&lt;/a&gt;, and yes, even &lt;a href=&#34;https://brew.sh&#34;&gt;Homebrew&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;
+Is it possible? I don&amp;#39;t know, but I started building a package manager
+by accident. I was attempting to improve the build system for &lt;a href=&#34;https://www.xquartz.org&#34;&gt;XQuartz&lt;/a&gt;
+when I realized I had essentially built a mini-package manager with
+package recipes, dependency graphs, incremental builds, patch phase,
+and so on. It is called &lt;a href=&#34;https://github.com/pkgmgr/pkgmgr&#34;&gt;pkgmgr&lt;/a&gt; and it is a work in progress.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-11&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-11&#34;&gt;
+Footnotes
+&lt;/h2&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+&lt;hr class=&#34;footnotes-separatator&#34;&gt;
+&lt;div class=&#34;footnote-definitions&#34;&gt;
+&lt;div class=&#34;footnote-definition&#34;&gt;
+&lt;sup id=&#34;footnote-1&#34;&gt;&lt;a href=&#34;#footnote-reference-1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;
+&lt;div class=&#34;footnote-body&#34;&gt;
+&lt;p&gt;This is from memory, unlike the TeX Live issue, I don&amp;#39;t have
+notes on the Emacs issue.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnote-definition&#34;&gt;
+&lt;sup id=&#34;footnote-2&#34;&gt;&lt;a href=&#34;#footnote-reference-2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;
+&lt;div class=&#34;footnote-body&#34;&gt;
+&lt;p&gt;I guess they merged Linuxbrew into Homebrew. 🤷‍♂️&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnote-definition&#34;&gt;
+&lt;sup id=&#34;footnote-3&#34;&gt;&lt;a href=&#34;#footnote-reference-3&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;
+&lt;div class=&#34;footnote-body&#34;&gt;
+&lt;p&gt;This is a cold start.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnote-definition&#34;&gt;
+&lt;sup id=&#34;footnote-4&#34;&gt;&lt;a href=&#34;#footnote-reference-4&#34;&gt;4&lt;/a&gt;&lt;/sup&gt;
+&lt;div class=&#34;footnote-body&#34;&gt;
+&lt;p&gt;MacPorts was run in a virtual machine so there was some added
+overhead.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+      </item>
+    
+      <item>
+        <title>Org Babel</title>
+        <link>https://haltingproblems.github.io/post/org-babel/</link>
+        <pubDate>Mon, 20 Jan 2020 00:00:00 UTC</pubDate>
+        <author></author>
+        <guid>https://haltingproblems.github.io/post/org-babel/</guid>
+        <description>
+&lt;link rel=&#34;stylesheet&#34; href=&#34;https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css&#34; integrity=&#34;sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ&#34; crossorigin=&#34;anonymous&#34;&gt;
+&lt;script defer src=&#34;https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js&#34; integrity=&#34;sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij&#34; crossorigin=&#34;anonymous&#34;&gt;&lt;/script&gt;
+&lt;script defer src=&#34;https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js&#34; integrity=&#34;sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI&#34; crossorigin=&#34;anonymous&#34; onload=&#34;renderMathInElement(document.body);&#34;&gt;&lt;/script&gt;
+&lt;script&gt;
+document.addEventListener(&#34;DOMContentLoaded&#34;, function() {
+renderMathInElement(document.body, {
+delimiters: [{left: &#34;\\(&#34;, right: &#34;\\)&#34;, display: true}],
+})
+})
+&lt;/script&gt;
+&lt;div id=&#34;outline-container-headline-1&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-1&#34;&gt;
+Code Blocks
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-1&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+At the heart of Babel are Org code blocks. Code blocks are delimited
+with a special comment syntax. Here is an example code block in Elisp:&lt;/p&gt;
+&lt;pre class=&#34;example&#34;&gt;
+#+BEGIN_SRC elisp
+  (defun mccarthy91 (n)
+     &amp;#34;McCarthy 91 is used as a formal verification test case.&amp;#34;
+     (if (&amp;lt;= n 100)
+         (mccarthy91 (mccarthy91 (+ n 11)))
+       (- n 10)))
+#+END_SRC
+&lt;/pre&gt;
+&lt;p&gt;
+The basic form is simple. A chunk of code is surrounded by
+&lt;code class=&#34;verbatim&#34;&gt;#+BEGIN_SRC lang&lt;/code&gt; … &lt;code class=&#34;verbatim&#34;&gt;#+END_SRC&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;
+Code blocks can be modified with annotations, switches, and header
+arguments. The expanded structure follows&lt;/p&gt;
+&lt;pre class=&#34;example&#34;&gt;
+#+NAME: &amp;lt;name&amp;gt;
+#+BEGIN_SRC &amp;lt;language&amp;gt; &amp;lt;switches&amp;gt; &amp;lt;header arguments&amp;gt;
+ &amp;lt;body&amp;gt;
+#+END_SRC
+&lt;/pre&gt;
+&lt;p&gt;
+Especially useful are header arguments such as &lt;code class=&#34;verbatim&#34;&gt;:session&lt;/code&gt;, &lt;code class=&#34;verbatim&#34;&gt;:results&lt;/code&gt;,
+and &lt;code class=&#34;verbatim&#34;&gt;:exports&lt;/code&gt;. Header arguments can be placed on the &lt;code class=&#34;verbatim&#34;&gt;#+BEGIN_SRC&lt;/code&gt;
+line as follows&lt;/p&gt;
+&lt;pre class=&#34;example&#34;&gt;
+#+BEGIN_SRC elisp :exports code
+ &amp;lt;body&amp;gt;
+#+END_SRC
+&lt;/pre&gt;
+&lt;p&gt;
+Or they can be placed as code block annotations as follows&lt;/p&gt;
+&lt;pre class=&#34;example&#34;&gt;
+#+HEADER: :exports code
+#+BEGIN_SRC elisp
+ &amp;lt;body&amp;gt;
+#+END_SRC
+&lt;/pre&gt;
+&lt;p&gt;
+Multiple header blocks can be used in either form.&lt;/p&gt;
+&lt;pre class=&#34;example&#34;&gt;
+#+BEGIN_SRC elisp :exports code :results replace table
+ &amp;lt;body&amp;gt;
+#+END_SRC
+
+#+HEADER: :exports code
+#+HEADER: :results replace table
+#+BEGIN_SRC elisp
+ &amp;lt;body&amp;gt;
+#+END_SRC
+&lt;/pre&gt;
+&lt;p&gt;
+The &lt;code class=&#34;verbatim&#34;&gt;:exports&lt;/code&gt; header argument is incredibly useful. It controls how
+the code block is used when exporting. It can simply list its code in
+the exported document by using &lt;code class=&#34;verbatim&#34;&gt;:exports code&lt;/code&gt;. Or it can evaluate the
+code and export just the results using &lt;code class=&#34;verbatim&#34;&gt;:exports results&lt;/code&gt;. To include
+both the code and the results in the exported document use &lt;code class=&#34;verbatim&#34;&gt;:exports
+both&lt;/code&gt;. Finally the code and the results can be excluded from the
+exported document using &lt;code class=&#34;verbatim&#34;&gt;:exports none&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-2&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-2&#34;&gt;
+Code Block Variables in Elisp
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-2&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Simple example shows setting a variable in a header comment.&lt;/p&gt;
+&lt;pre class=&#34;example&#34;&gt;
+#+NAME: square_el
+#+HEADER: :var x=0
+#+BEGIN_SRC elisp
+  (* x x)
+#+END_SRC
+&lt;/pre&gt;
+&lt;p&gt;
+Now we can use &lt;code class=&#34;verbatim&#34;&gt;#+CALL:&lt;/code&gt; to invoke the named code block.&lt;/p&gt;
+&lt;p&gt;
+&lt;code class=&#34;verbatim&#34;&gt;#+CALL: square_el(x=6)&lt;/code&gt;&lt;/p&gt;
+&lt;pre class=&#34;example&#34;&gt;
+36
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-3&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-3&#34;&gt;
+Code Block Variables in Python
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-3&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Now a simple example in Python.&lt;/p&gt;
+&lt;pre class=&#34;example&#34;&gt;
+#+NAME: square_py
+#+HEADER: :var x=0
+#+BEGIN_SRC python
+  return x * x
+#+END_SRC
+&lt;/pre&gt;
+&lt;p&gt;
+Likewise we can use &lt;code class=&#34;verbatim&#34;&gt;#+CALL:&lt;/code&gt; to invoke the named Python code block.&lt;/p&gt;
+&lt;p&gt;
+&lt;code class=&#34;verbatim&#34;&gt;#+CALL: square_py(x=5)&lt;/code&gt;&lt;/p&gt;
+&lt;pre class=&#34;example&#34;&gt;
+25
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-4&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-4&#34;&gt;
+Inline Code Block
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-4&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Code can be evaluated inline using &lt;code class=&#34;verbatim&#34;&gt;src_lang{code}&lt;/code&gt;. Thus to get the
+current Emacs version use &lt;code class=&#34;verbatim&#34;&gt;src_elisp{(format &amp;#34;%s&amp;#34;
+emacs-major-version)}&lt;/code&gt;. This document was prepared with Emacs
+&lt;code class=&#34;verbatim&#34;&gt;26&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-5&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-5&#34;&gt;
+Inline Code Block with Arguments
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-5&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Inline code with arguments has the form &lt;code class=&#34;verbatim&#34;&gt;src_lang[args]{code}&lt;/code&gt;. Thus
+we can assign a variable inline like so &lt;code class=&#34;verbatim&#34;&gt;src_elisp[:var x=25]{(sqrt
+x)}&lt;/code&gt; can be used to show that \( \sqrt{25} = \) &lt;code class=&#34;verbatim&#34;&gt;5.0&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-6&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-6&#34;&gt;
+Named Inline Calls
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-6&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Named code blocks can be called in a similar fashion and syntax used
+for inline code blocks. The form is &lt;code class=&#34;verbatim&#34;&gt;call_name()&lt;/code&gt; or the expanded form
+&lt;code class=&#34;verbatim&#34;&gt;call_name[inside-header-args](args)[end-header-args]&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;example&#34;&gt;
+#+NAME: mcpython91
+#+BEGIN_SRC python :var in_from_org=0 :exports none
+ def mccarthy91(n):
+     &amp;#34;McCarthy 91 is used as a formal verification test case.&amp;#34;
+     if n &amp;lt;= 100:
+         return mccarthy91(mccarthy91(n + 11))
+     else:
+         return n - 10
+
+ return mccarthy91(in_from_org)
+#+END_SRC
+&lt;/pre&gt;
+&lt;p&gt;
+The McCarthy 91 function with the argument &lt;code class=&#34;verbatim&#34;&gt;4&lt;/code&gt; evaluates to
+&lt;code class=&#34;verbatim&#34;&gt;91&lt;/code&gt; and with the argument &lt;code class=&#34;verbatim&#34;&gt;246&lt;/code&gt; evaluates to
+&lt;code class=&#34;verbatim&#34;&gt;236&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;
+Likewise the following are true&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code class=&#34;verbatim&#34;&gt;call_mcpython91(0)&lt;/code&gt; = &lt;code class=&#34;verbatim&#34;&gt;91&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code class=&#34;verbatim&#34;&gt;call_mcpython91(1)&lt;/code&gt; = &lt;code class=&#34;verbatim&#34;&gt;91&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code class=&#34;verbatim&#34;&gt;call_mcpython91(85)&lt;/code&gt; = &lt;code class=&#34;verbatim&#34;&gt;91&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code class=&#34;verbatim&#34;&gt;call_mcpython91(101)&lt;/code&gt; = &lt;code class=&#34;verbatim&#34;&gt;91&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code class=&#34;verbatim&#34;&gt;call_mcpython91(102)&lt;/code&gt; = &lt;code class=&#34;verbatim&#34;&gt;92&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code class=&#34;verbatim&#34;&gt;call_mcpython91(185)&lt;/code&gt; = &lt;code class=&#34;verbatim&#34;&gt;175&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The McCarthy 91 function has the property \( \forall n \in \mathbb{N}
+\), &lt;strong&gt;if&lt;/strong&gt; \( n \leq 100 \) &lt;strong&gt;then&lt;/strong&gt; \( f(n) = 91 \) &lt;strong&gt;else&lt;/strong&gt; \( f(n) = n -
+10 \).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-7&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-7&#34;&gt;
+Use a Org table as Input
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-7&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Take from Org &lt;a href=&#34;https://orgmode.org/worg/org-contrib/babel/intro.html#orgd8cf22d&#34;&gt;Babel: Introduction&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;
+Given this table of numbers&lt;/p&gt;
+&lt;table&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;2&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;3&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;4&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;5&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;6&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;7&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;8&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;9&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;10&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&#34;align-right&#34;&gt;2&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;4&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;6&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;8&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;10&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;12&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;14&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;16&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;18&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;20&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;
+It is expressed in an Org file like so&lt;/p&gt;
+&lt;pre class=&#34;example&#34;&gt;
+#+TBLNAME: fibonacci-inputs
+| 1 | 2 | 3 | 4 |  5 |  6 |  7 |  8 |  9 | 10 |
+| 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 | 18 | 20 |
+&lt;/pre&gt;
+&lt;p&gt;
+We can use the table named &lt;code class=&#34;verbatim&#34;&gt;fibonacci-inputs&lt;/code&gt; as inputs to a Fibonacci
+function called while we &amp;#34;map&amp;#34; the rows&amp;#39; values to \( f(n) \).&lt;/p&gt;
+&lt;div class=&#34;src src-elisp&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-elisp&#34; data-lang=&#34;elisp&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;defun&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;fibonacci&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;n&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;n&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;n&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;fibonacci&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;-&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;n&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;fibonacci&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;-&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;n&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;mapcar&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;lambda&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;row&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;mapcar&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;#&amp;#39;&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;fibonacci&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;row&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;fib-inputs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+In an Org file that looks like so&lt;/p&gt;
+&lt;pre class=&#34;example&#34;&gt;
+#+NAME: fibonacci-seq
+#+HEADER: :exports both
+#+BEGIN_SRC elisp :var fib-inputs=fibonacci-inputs
+ (defun fibonacci (n)
+   (if (&amp;lt; n 2) n
+     (+ (fibonacci (- n 1)) (fibonacci (- n 2)))))
+
+ (mapcar (lambda (row)
+           (mapcar #&amp;#39;fibonacci row)) fib-inputs)
+#+END_SRC
+&lt;/pre&gt;
+&lt;p&gt;
+And produces the following table of Fibonacci numbers&lt;/p&gt;
+&lt;table&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;2&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;3&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;5&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;8&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;13&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;21&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;34&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;55&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;3&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;8&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;21&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;55&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;144&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;377&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;987&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;2584&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;6765&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-8&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-8&#34;&gt;
+Preview Variable or Tangle Expansion/Substitution
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-8&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Use &lt;code class=&#34;verbatim&#34;&gt;C-c C-v v&lt;/code&gt; or &lt;code class=&#34;verbatim&#34;&gt;C-c C-v C-v&lt;/code&gt; to preview the expanded content with
+&lt;code class=&#34;verbatim&#34;&gt;org-babel-expand-src-block&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-9&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-9&#34;&gt;
+Pascals Triangle in Python
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-9&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Taken from &lt;a href=&#34;https://www.jstatsoft.org/article/view/v046i03&#34;&gt;a journal paper on reproducible research&lt;/a&gt;.&lt;/p&gt;
+&lt;div class=&#34;src src-python&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;pascals_triangle&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;n&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;n&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;          &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      &lt;span class=&#34;n&#34;&gt;prev_triangle&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;pascals_triangle&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;n&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      &lt;span class=&#34;n&#34;&gt;prev_row&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;prev_triangle&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;n&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      &lt;span class=&#34;n&#34;&gt;this_row&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;map&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;sum&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;zip&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;([&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;prev_row&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;prev_row&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;prev_triangle&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;this_row&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;pascals_triangle&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;n&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;table&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;2&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;3&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;3&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;4&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;6&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;4&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;5&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;10&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;10&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;5&lt;/td&gt;
+&lt;td class=&#34;align-right&#34;&gt;1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+      </item>
+    
+      <item>
+        <title>Grammar Checking in Emacs</title>
+        <link>https://haltingproblems.github.io/post/grammar-checking-in-emacs/</link>
+        <pubDate>Wed, 15 Jan 2020 00:00:00 UTC</pubDate>
+        <author></author>
+        <guid>https://haltingproblems.github.io/post/grammar-checking-in-emacs/</guid>
+        <description>&lt;p class=&#34;message warning&#34;&gt;⚠️ This post was &lt;i&gt;actually&lt;/i&gt; written in
+&lt;b&gt;2013&lt;/b&gt; and is out of date.&lt;/p&gt;
+&lt;p&gt;Grammar checking is apparently an error prone task. Or at least it has
+been claimed: &lt;a href=&#34;http://faculty.washington.edu/sandeep/check&#34;&gt;http://faculty.washington.edu/sandeep/check&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Looks like there is &lt;a href=&#34;http://www.gnu.org/software/diction/&#34;&gt;GNU
+diction&lt;/a&gt;, but it just highlights
+potentially misused words. It doesn&amp;rsquo;t indicate where an error
+occurred. I&amp;rsquo;m not comfortable investing much time into getting this
+working with Emacs. Since there doesn&amp;rsquo;t appear to be much return for
+the effort.&lt;/p&gt;
+&lt;p&gt;I came across &lt;a href=&#34;http://www.emacswiki.org/emacs/BaoqiuCui&#34;&gt;Baoqiu Cui&lt;/a&gt;&#39;s
+EmacsWiki user page. Baoqui has created a grammar checker for Emacs and
+links to his package from his page. There aren&amp;rsquo;t many details, but the
+screenshots on his user page appear promising. The package can be
+found here &lt;a href=&#34;https://code.google.com/archive/p/bcui-emacs/source/default/source&#34;&gt;https://code.google.com/archive/p/bcui-emacs/source/default/source&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;This will be my attempt at getting it working with Emacs.&lt;/p&gt;
+&lt;p&gt;According to Baoqiu&amp;rsquo;s
+&lt;a href=&#34;http://code.google.com/p/bcui-emacs/source/browse/trunk/grammar/README&#34;&gt;README&lt;/a&gt;
+file the package uses the &lt;a href=&#34;http://www.abisource.com/projects/link-grammar/&#34;&gt;Link Grammar
+Parser&lt;/a&gt;. The first
+step looks like I should install the Link Grammar Parser. The parser
+is available from &lt;a href=&#34;http://www.macports.org&#34;&gt;MacPorts&lt;/a&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ sudo port install link-grammar
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As can bee seen in the
+&lt;a href=&#34;http://code.google.com/p/bcui-emacs/source/browse/trunk/grammar/grammar.cc&#34;&gt;grammar.cc&lt;/a&gt;
+in Baoqui&amp;rsquo;s package we need the link-includes.h file to be on our
+system. Let&amp;rsquo;s verify that the MacPorts package included that file.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ port contents link-grammar | grep &amp;quot;link-includes&amp;quot;
+/opt/local/include/link-grammar/link-includes.h
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;So, yup this is included. The next thing we need to do is download
+Baoqui&amp;rsquo;s package. We&amp;rsquo;ll have to checkout the source code from its repo
+hosted on the now &lt;a href=&#34;http://code.google.com&#34;&gt;defunct Google Code&lt;/a&gt;. I
+like to keep third-party source code in my &lt;code&gt;~/src&lt;/code&gt;
+directory.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ cd ~/src
+$ svn checkout http://bcui-emacs.googlecode.com/svn/trunk/grammar grammar.svn
+A    grammar.svn/grammar.el
+A    grammar.svn/grammar.cc
+A    grammar.svn/README
+A    grammar.svn/Makefile
+U    grammar.svn
+Checked out revision 51.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We need to fix up the &lt;code&gt;Makefile&lt;/code&gt; so that &lt;code&gt;gcc&lt;/code&gt;
+knows where to find the include file we installed with MacPorts. This
+is as simple as changing one line in the &lt;code&gt;Makefile&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;INCDIRS = -I. -I/opt/local/include/link-grammar
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Next we&amp;rsquo;ll attempt to run make. Hopefully this will compile without
+incident.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ make
+g++ -g -I. -I/opt/local/include/link-grammar -c grammar.cc
+In file included from grammar.cc:28:
+/opt/local/include/link-grammar/link-includes.h:16:40: error:
+link-grammar/link-features.h: No such file or directory
+...
+grammar.cc:30: error: expected constructor, destructor, or type conversion before â€˜intâ€™
+make: *** [grammar.o] Error 1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Looks like we got a few screen fulls of errors. Let&amp;rsquo;s investigate the
+first. &lt;code&gt;gcc&lt;/code&gt; says it can&amp;rsquo;t find the file
+&lt;code&gt;link-features.h&lt;/code&gt;. The first thing I want to do is check
+that it was included when we installed the Link Grammar Parser with
+MacPorts.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ port contents link-grammar | grep &amp;quot;link-features&amp;quot;
+  /opt/local/include/link-grammar/link-features.h
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Okay, the file exist in the MacPorts package. This means something
+else is wrong. I suspect that the path we changed in the include file
+is wrong for the way &lt;code&gt;link-includes.h&lt;/code&gt; is expecting our
+includes to be setup. My guess is that &lt;code&gt;link-includes.h&lt;/code&gt;
+references the missing file using its parent directory and then the
+include file, so it would look like &lt;code&gt;#include
+&amp;ldquo;link-grammar/link-features.h&amp;rdquo;&lt;/code&gt;. This is a common pattern in
+C. We can easily check this using &lt;code&gt;sed&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ sed -n 16,16p /opt/local/include/link-grammar/link-includes.h
+#include &amp;lt;link-grammar/link-features.h&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;So, my theory was correct. Well have to fix the &lt;code&gt;Makefile&lt;/code&gt;
+and fix the &lt;code&gt;grammar.cc&lt;/code&gt; file.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Makefile&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;INCDIRS = -I. -I/opt/local/include
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;grammar.cc&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;#include &amp;quot;link-grammar/link-includes.h&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we&amp;rsquo;re ready to try running &lt;code&gt;make&lt;/code&gt; again. This run
+should compile correctly.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ make
+g++ -g -I. -I/opt/local/include -c grammar.cc
+g++ -g -llink-grammar -o grammar grammar.o
+ld: library not found for -llink-grammar
+collect2: ld returned 1 exit status
+make: *** [all] Error 1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This one is easy, it&amp;rsquo;s just a linker error. Since we&amp;rsquo;re using MacPorts
+we need to tell the linker where to find Link Grammar Parser&amp;rsquo;s library
+file. Since we installed the library with MacPorts we know the library
+will be in &lt;code&gt;/opt/local/lib&lt;/code&gt;. We just need fix the
+&lt;code&gt;Makefile&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;First change: add a &lt;code&gt;LDFLAGS&lt;/code&gt; variable to the
+&lt;code&gt;Makefile&lt;/code&gt; right after the &lt;code&gt;INCDIRS&lt;/code&gt; variables.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;LDFLAGS=-L/opt/local/lib
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Next change the &lt;code&gt;all&lt;/code&gt; rule to use the new
+&lt;code&gt;LDFLAGS&lt;/code&gt; variable.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;all: $(objects)
+    g++ -g $(LDFLAGS) -llink-grammar -o grammar $(objects)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now this thing should finally compile.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ make
+g++ -g -L/opt/local/lib -llink-grammar -o grammar grammar.o
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Awesome! It worked. Now we can move on to getting this working in
+Emacs.&lt;/p&gt;
+&lt;p&gt;Copy the files into your &lt;code&gt;~/.emacs.d/site-lisp&lt;/code&gt; directory.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; $ mkdir -p ~/.emacs.d/site-lisp/grammar
+ $ cp grammar ~/.emacs.d/site-lisp/grammar
+ $ cp grammar.el ~/.emacs.d/site-lisp/grammar
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Then add the following to your &lt;code&gt;~/.emacs&lt;/code&gt; file.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;;; Grammar Checker
+(add-to-list &#39;load-path &amp;quot;~/.emacs.d/site-lisp/grammar&amp;quot;)
+(add-to-list &#39;exec-path &amp;quot;/Users/eddie/.emacs.d/site-lisp/grammar&amp;quot;)
+(autoload &#39;grammar-mode &amp;quot;grammar&amp;quot; nil t)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we can try out &lt;code&gt;grammar-mode&lt;/code&gt;. Switch to a buffer for
+typing (&lt;code&gt;*scratch*&lt;/code&gt; is as good as any). Turn on
+&lt;code&gt;grammar-mode&lt;/code&gt; by typing &lt;code&gt;M-x grammar-mode&lt;/code&gt;. Now
+try typing one of the examples from Baoqiu&amp;rsquo;s user page. You&amp;rsquo;ll have to
+type two spaces or a newline after you type the period to get
+&lt;code&gt;grammar-mode&lt;/code&gt; to check the sentence. I did example 2.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;The books is good for beginning reader.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You&amp;rsquo;ll see the words &amp;ldquo;The&amp;rdquo;, &amp;ldquo;books&amp;rdquo;, &amp;ldquo;for&amp;rdquo;, and &amp;ldquo;reader&amp;rdquo; underlined
+with green. This means there are some grammar errors. You can,
+obviously, fix the errors by changing the sentence to the
+following. Remember you need to type two spaces or a newline after you
+type the period.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;The books are good for beginning readers.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You can also use the mode&amp;rsquo;s shortcut to run a check on the sentence
+before or at the current point. The shortcut is &lt;code&gt;C-M-g&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Caveats: there isn&amp;rsquo;t an interactive mode like &lt;code&gt;ispell&lt;/code&gt;. So
+you have to check the grammar as you type it or one sentence at a
+time. You can&amp;rsquo;t just type your document and as a final step check your
+grammar. The other big issue I have is that there is no description of
+the error. The last issue I have, which is least important, is that
+there are no suggestions for correcting the errors.&lt;/p&gt;
+</description>
+      </item>
+    
+      <item>
+        <title>Locate an Unknown non-ASCII Multi-byte Character in a File</title>
+        <link>https://haltingproblems.github.io/post/locate-nonascii-multibyte-character/</link>
+        <pubDate>Mon, 13 Jan 2020 00:00:00 UTC</pubDate>
+        <author></author>
+        <guid>https://haltingproblems.github.io/post/locate-nonascii-multibyte-character/</guid>
+        <description>&lt;h2 id=&#34;problem&#34;&gt;Problem&lt;/h2&gt;
+&lt;p&gt;Some program or API is failing because of a rouge multi-byte
+character in a file. So how do you locate the unknown character
+without examining every character in the file?&lt;/p&gt;
+&lt;h2 id=&#34;answer--annoying-but-correct&#34;&gt;Answer (annoying, but correct)&lt;/h2&gt;
+&lt;p&gt;Every search points to &lt;code&gt;-P&lt;/code&gt; with grep, but that&amp;rsquo;s GNU grep not BSD
+grep that macOS ships with. Get over it and install goddamn GNU
+grep. &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ brew install grep
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When brew is done it will inform you that any command (binary)
+installed will have the prefix &amp;ldquo;g&amp;rdquo; for GNU.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;All commands have been installed with the prefix &amp;#34;g&amp;#34;.
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Thus to use GNU grep on macOS type &lt;code&gt;ggrep&lt;/code&gt;. To find all occurrences
+of multi-byte character in &lt;code&gt;badfile.txt&lt;/code&gt; input the following&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ ggrep --color=&amp;#39;auto&amp;#39; -P -n &amp;#39;[^\x00-\x7F]&amp;#39; badfile.txt
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34;&gt;
+&lt;p&gt;There definitely has to be a better way (something with non-GNU stuff).&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+      </item>
+    
+      <item>
+        <title>Spellchecking in Emacs</title>
+        <link>https://haltingproblems.github.io/post/spellchecking-in-emacs/</link>
+        <pubDate>Sat, 11 Jan 2020 00:00:00 UTC</pubDate>
+        <author></author>
+        <guid>https://haltingproblems.github.io/post/spellchecking-in-emacs/</guid>
+        <description>&lt;p class=&#34;message warning&#34;&gt;⚠️ This post was &lt;i&gt;actually&lt;/i&gt; written in
+&lt;b&gt;2013&lt;/b&gt; and is out of date.&lt;/p&gt;
+&lt;p&gt;Emacs doesn&amp;rsquo;t have a built-in dictionary, but it does have an
+interface for checking and correcting spelling. The interface is
+called &lt;code&gt;ispell&lt;/code&gt; (the &lt;em&gt;i&lt;/em&gt; is for interactive). To use
+&lt;code&gt;ispell&lt;/code&gt; simply run &lt;kbd&gt;M-x ispell&lt;/kbd&gt;. By itself it&amp;rsquo;s
+pretty useless and you&amp;rsquo;ll get an error in the mini-buffer.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Searching for program: no such file or directory, ispell
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As the error says, Emacs need an external program for
+spellchecking. There are a few options:
+&lt;a href=&#34;http://ficus-www.cs.ucla.edu/geoff/ispell.html&#34;&gt;Ispell&lt;/a&gt;, &lt;a href=&#34;http://www.gnu.org/software/aspell/&#34;&gt;GNU
+Aspell&lt;/a&gt;, or
+&lt;a href=&#34;http://hunspell.sourceforge.net&#34;&gt;Hunspell&lt;/a&gt;. Personally I use Aspell,
+but Hunspell is also decent from what I understand. Aspell was
+designed to replace Ispell, so I don&amp;rsquo;t recommend using Ispell.&lt;/p&gt;
+&lt;h2 id=&#34;installing-aspell&#34;&gt;Installing Aspell&lt;/h2&gt;
+&lt;p&gt;First obtain &lt;a href=&#34;http://www.macports.org&#34;&gt;MacPorts&lt;/a&gt; for your system if
+you don&amp;rsquo;t already have it. I suppose you could use Homebrew if you are
+so inclined (I&amp;rsquo;m not convinced that its better than MacPorts though).&lt;/p&gt;
+&lt;p&gt;Install Aspell:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ sudo port install aspell
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Then install a language dictionary (probably English):&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ sudo port install aspell-dict-en
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;ensuring-emacs-finds-aspell&#34;&gt;Ensuring Emacs finds Aspell&lt;/h2&gt;
+&lt;p&gt;Emacs.app on Mac doesn&amp;rsquo;t load your environment by default so to make
+aspell work as the ispell dictionary we have to tell Emacs where to
+find the binary. Then we have to tell emacs to use aspell. In your
+&lt;code&gt;.emacs&lt;/code&gt; file add the following lines:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;(setq exec-path (append exec-path &#39;(&amp;quot;/opt/local/bin&amp;quot;)))
+(setq-default ispell-program-name &amp;quot;aspell&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;That&amp;rsquo;s it, &lt;kbd&gt;M-x ispell&lt;/kbd&gt; should now work.&lt;/p&gt;
+</description>
+      </item>
+    
+      <item>
+        <title>First Post</title>
+        <link>https://haltingproblems.github.io/post/first-post/</link>
+        <pubDate>Thu, 09 Jan 2020 14:23:39 -0800</pubDate>
+        <author></author>
+        <guid>https://haltingproblems.github.io/post/first-post/</guid>
+        <description>&lt;p&gt;
+Let&amp;#39;s see if I can update this site on a regular basis. 🤞&lt;/p&gt;
+</description>
+      </item>
+    
+
+  </channel>
+</rss>

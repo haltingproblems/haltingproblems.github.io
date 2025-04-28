@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+<title>The Problem with Homebrew &middot; Halting Problems</title>
+
+
+<link rel="stylesheet" href=/css/fonts.css>
+<link rel="stylesheet" href=/css/syntax.css>
+<link rel="stylesheet" href=/css/stix.css>
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144"
+      href=/apple-touch-icon-144-precomposed.png>
+<link rel="shortcut icon" href=/favicon.ico>
+
+
+<meta property="og:url" content="https://haltingproblems.github.io/post/homebrew-problems/">
+  <meta property="og:site_name" content="Halting Problems">
+  <meta property="og:title" content="The Problem with Homebrew">
+  <meta property="og:description" content="I need to spill the tea on the Homebrew package manager, but first some praise. Homebrew is a really good name. It&#39;s cute! Its chock-full of Apple history: the Apple I computer was introduced at the Homebrew Computer Club.
+The name evokes nostalgia, I&#39;m getting a warm feeling just thinking about retro computers. The clickety-clack of the mechanical keys, the low-frequency grind of floppy drive, the smell of the electronics and the printed manuals. Even Terminal.app ships with a retro theme called Homebrew.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2021-11-02T00:00:00+00:00">
+    <meta property="article:modified_time" content="2021-11-02T00:00:00+00:00">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="The Problem with Homebrew">
+  <meta name="twitter:description" content="I need to spill the tea on the Homebrew package manager, but first some praise. Homebrew is a really good name. It&#39;s cute! Its chock-full of Apple history: the Apple I computer was introduced at the Homebrew Computer Club.
+The name evokes nostalgia, I&#39;m getting a warm feeling just thinking about retro computers. The clickety-clack of the mechanical keys, the low-frequency grind of floppy drive, the smell of the electronics and the printed manuals. Even Terminal.app ships with a retro theme called Homebrew.">
+
+
+</head>
+<body>
+<div class="page">
+  <div class="page-width">
+    <header class="masthead container">
+    <h1 class="masthead-title">
+      <a href=/ title="Home">Halting Problems</a>
+    </h1>
+    
+    <nav class="nav">
+      [
+      
+          <a href="/">Home</a>
+      
+         | <a href="/portfolio/">Portfolio</a>
+      
+         | <a href="/about/">About</a>
+      
+      ]
+    </nav>
+</header>
+
+    <main class="container">
+      
+
+
+
+
+
+
+<div class="post">
+  <header class="post-header">
+    <h1 class="post-title">The Problem with Homebrew</h1>
+    
+    <div class="post-metadata">
+      <span class="post-date">Nov 2, 2021</span>
+    </div>
+  </header>
+  
+<p>
+I need to spill the tea on the Homebrew package manager, but first
+some praise. Homebrew is a really good name. It&#39;s cute! Its chock-full
+of Apple history: the <a href="https://americanhistory.si.edu/collections/search/object/nmah_1692121">Apple I</a> computer was introduced at <a href="https://www.computerhistory.org/revolution/personal-computers/17/312">the Homebrew
+Computer Club</a>.</p>
+<img src="./hb-club.jpg" alt="./hb-club.jpg" title="Jobs &amp; Woz at the Homebrew Computer Club" class="center"/>
+<p>
+The name evokes nostalgia, I&#39;m getting a warm feeling just thinking
+about retro computers. The clickety-clack of the mechanical keys, the
+low-frequency grind of floppy drive, the smell of the electronics and
+the printed manuals. Even Terminal.app ships with a retro theme called
+Homebrew.</p>
+<img src="./homebrew-theme.jpg" alt="./homebrew-theme.jpg" title="Screenshot of Terminal.app show the Homebrew theme" class="center"/>
+<p>
+Homebrew also has a great out-of-the-box experience. Installation is a
+single command you paste into your shell. By default, there’s no
+configuration to fiddle with, no path to set, and no permissions to
+worry about. I believe this handful of of positives account for its
+popularity, however simple they might be.</p>
+<p>
+With that said, this post presents <em>some</em> of the problems I’ve
+encountered using Homebrew. They&#39;re not the biggest problems or the
+most egregious, but I think they&#39;re the easiest to understand and the
+most relatable.</p>
+<div id="outline-container-headline-1" class="outline-2">
+<h2 id="headline-1">
+Cutesy names gone wild
+</h2>
+<div id="outline-text-headline-1" class="outline-text-2">
+<p>
+The cutesy name by itself is fine. But when you over-extend the
+metaphor to actual home beer brewing (<a href="https://americanhistory.si.edu/blog/papazian">thanks, Jimmy Carter</a>) and force
+beer nouns onto a package management system, things quickly go off the
+rails.</p>
+<p>
+Thus, we have Casks, (poured) Bottles, Taps, Kegs, Formulae, Recipes,
+Cellar, Caskroom, and others. I have no idea what “key only” is
+supposed to mean. I kind of get &#34;taps&#34;, but these terms are mostly
+baffling.</p>
+<p>
+<em>Stop it!</em></p>
+<p>
+It’s <strong>package manager</strong>. It installs <strong>packages</strong> from <strong>source</strong> or as
+<strong>binaries</strong>. Packages are organized and indexed in a <strong>package
+repository</strong>. Use the nomenclature that we have all agreed on.</p>
+</div>
+</div>
+<div id="outline-container-headline-2" class="outline-2">
+<h2 id="headline-2">
+Package managers package packages
+</h2>
+<div id="outline-text-headline-2" class="outline-text-2">
+<p>
+It might seem obvious, but a package managers purpose is to package
+and manage packages for you. The unforgivable sin of a package manager
+is to not package something you need or worse to print a cop-out when
+you request a package be installed.</p>
+<p>
+When I evaluate a package manager I check for a few packages: it needs
+to have Emacs and its variants, CLI only, the NextSTEP (Emacs.app
+package) variant, X11 variant, etc; it needs to have XQuartz on a Mac
+and X11 on Linux, obviously; it should package TeX Live too.</p>
+<p>
+Screw any of this up and you don’t have a package manager suitable for
+my use case. When Homebrew first came on the scene I recall at least
+TeX Live and XQuartz not being available. I seem to remember something
+wrong with Emacs too, maybe it didn&#39;t have the NS/app variant.<sup class="footnote-reference"><a id="footnote-reference-1" href="#footnote-1">1</a></sup></p>
+<div id="outline-container-headline-3" class="outline-3">
+<h3 id="headline-3">
+The case of TeX Live
+</h3>
+<div id="outline-text-headline-3" class="outline-text-3">
+<p>
+Historically Homebrew would not install TeX Live.</p>
+<div class="src src-text">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ brew install tex-live
+</span></span><span class="line"><span class="cl">Installing TeX from source is weird and gross, requires a lot of
+</span></span><span class="line"><span class="cl">patches, and only builds 32-bit (and thus can&#39;t use Homebrew deps on
+</span></span><span class="line"><span class="cl">Snow Leopard.)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">We recommend using a MacTeX distribution: http://www.tug.org/mactex/</span></span></code></pre></div>
+</div>
+<p>
+Homebrew no longer prints this cop-out. It may seem unfair to bring up
+Homebrew&#39;s historic behavior, but I think it highlights a flaw in the
+philosophy of Homebrew that persist to this day. Homebrew punts on
+anything that&#39;s tricky. Building software is weird and gross? As a
+package manager, that&#39;s literally your job!</p>
+<p>
+Nowadays, instead of a cop-out, Homebrew directs you to use the Cask
+system. Homebrew hard-codes two packages for blanket refusal, the
+first is Xcode which is understandable (although disappointing), the
+second is TeX.</p>
+<div class="src src-text">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ brew install tex-live
+</span></span><span class="line"><span class="cl">Warning: No available formula or cask with the name &#34;tex-live&#34;.
+</span></span><span class="line"><span class="cl">==&gt; Searching for similarly named formulae...
+</span></span><span class="line"><span class="cl">Error: No similarly named formulae found.
+</span></span><span class="line"><span class="cl">There are three versions of MacTeX.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Full installation:
+</span></span><span class="line"><span class="cl">  brew install --cask mactex
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Full installation without bundled applications:
+</span></span><span class="line"><span class="cl">  brew install --cask mactex-no-gui
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Minimal installation:
+</span></span><span class="line"><span class="cl">  brew install --cask basictex</span></span></code></pre></div>
+</div>
+<p>
+Casks, however, come with their own set of problems. A Cask, as far as
+I can tell, is a Homebrew abstraction over the <code class="verbatim">installer</code> program and
+the <em>installation package</em> format (<code class="verbatim">.pkg</code> &amp; <code class="verbatim">.mpkg</code>). That means the
+underlying implementation is closed source and the package are macOS
+only. Consequently, even if the upstream software is cross-platform,
+the Cask is not—not even on Linuxbrew.<sup class="footnote-reference"><a id="footnote-reference-2" href="#footnote-2">2</a></sup> This also means the
+packages are binary only and any compile-time options are
+inaccessible.</p>
+</div>
+</div>
+<div id="outline-container-headline-4" class="outline-3">
+<h3 id="headline-4">
+What the deal with macFUSE?
+</h3>
+<div id="outline-text-headline-4" class="outline-text-3">
+<p>
+At some point you may want to install a macFUSE filesystem like
+<code class="verbatim">bindfs</code>.</p>
+<div class="src src-text">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ brew install bindfs
+</span></span><span class="line"><span class="cl">Error: bindfs has been disabled because it requires
+</span></span><span class="line"><span class="cl">closed-source macFUSE!</span></span></code></pre></div>
+</div>
+<p>
+I don&#39;t care if it is closed-source. Homebrew has a lot of other
+closed-source software available, why is macFUSE different?</p>
+</div>
+</div>
+<div id="outline-container-headline-5" class="outline-3">
+<h3 id="headline-5">
+Other deliberately disabled package
+</h3>
+<div id="outline-text-headline-5" class="outline-text-3">
+<p>
+There are about 120 additional disabled packages. Many of these are
+FUSE based file systems and others are for reasons like
+&#34;unmaintained,&#34; &#34;doesn’t compile,&#34; or &#34;license issues.&#34; One is left
+wondering why a package manager should make decisions about licensing
+for you? Especially Homebrew, that facilitates installing
+closed-source binaries, it isn&#39;t like it&#39;s a GNU package manger with a
+strict ideology.</p>
+<p>
+Anything marked &#34;doesn&#39;t compile&#34; makes me question if this is a case
+of something being truly broken or a case of &#34;installing […] from
+source is weird and gross?&#34; I suspect the latter.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-6" class="outline-2">
+<h2 id="headline-6">
+Forced Upgrades
+</h2>
+<div id="outline-text-headline-6" class="outline-text-2">
+<p>
+There’s nothing I hate more than software that tries to &#34;help,&#34; but
+gets it wrong. That’s the opposite of helpful—that’s Clippy.</p>
+<img src="./clippy.png" alt="./clippy.png" title="Clippy being a d*ck" class="center"/>
+<p>
+Homebrew will update itself and upgrade all your outdated packages if
+you make the unfortunate decision to perform the innocuous task of
+installing an unrelated package. It will do this even when installing
+a package that has no dependencies in common with your installed
+packages.</p>
+<p>
+I know some people will claim that this is no big deal or even
+desirable in the age of continuous updates and moving targets. Maybe
+to understand the peril you need an update to break your system.</p>
+<p>
+There is a legitimate argument for updating and upgrading when new
+packages are installed, but why not notify the user that continuing
+will update and upgrade other packages? Give the user a way to back out
+before performing sweeping changes that may break their setup.</p>
+<p>
+Yes, there is an environment variable <code class="verbatim">HOMEBREW_NO_AUTO_UPDATE</code>. But
+you&#39;ll only go looking for it <em>after</em> Homebrew has borked your system
+once or twice.</p>
+<p>
+Configuration via environment variables have risks too. If you set
+<code class="verbatim">HOMEBREW_NO_AUTO_UPDATE</code> in your Bash <code class="verbatim">.profile</code> then switch to Zsh
+without porting all of your <code class="verbatim">.profile</code> to <code class="verbatim">.zshrc</code>, the next time you
+run <code class="verbatim">brew</code> you could be in a world of hurt. This is not just a
+hypothetical, I just did it to myself:</p>
+<p>
+I set my login shell to tcsh and a few days later tried to install
+<a href="https://www.shellcheck.net">ShellCheck</a> for the making sure my <code class="verbatim">#!/bin/sh</code> scripts are POSIX
+compatible (it seemed especially prudent while running a non-Bourne
+shell).</p>
+<p>
+The <code class="verbatim">HOMEBREW_NO_AUTO_UPDATE</code> environment variable does not stop every
+forced upgrade either, so with or without it set <code class="verbatim">brew install</code> is a
+ticking time bomb.</p>
+</div>
+</div>
+<div id="outline-container-headline-7" class="outline-2">
+<h2 id="headline-7">
+Homebrew is a little slow
+</h2>
+<div id="outline-text-headline-7" class="outline-text-2">
+<p>
+Homebrew is mostly Ruby. The <code class="verbatim">brew</code> command is implemented as a Bash
+script that execs (or sources) additional Bash scripts and Ruby
+scripts, but that&#39;s an implementation detail. There&#39;s a few Swift
+files too. But since it is mostly Ruby it is slow. You can expect
+about 1 second of wall clock overhead for any invocation of <code class="verbatim">brew</code>.</p>
+<div class="src src-text">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ time brew help
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">real	0m1.869s</span></span></code></pre></div>
+</div>
+<p>
+Repeat invocations of <code class="verbatim">brew</code> do speed up thanks to <a href="https://github.com/Shopify/bootsnap">bootsnap</a>, but not
+by much.</p>
+<div class="src src-text">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ time brew help
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">real	0m1.041s</span></span></code></pre></div>
+</div>
+<p>
+Search is incredibly slow</p>
+<div class="src src-text">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ time brew search git
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">real	0m13.542s</span></span></code></pre></div>
+</div>
+<p>
+At the time of this writing Homebrew returns 147 packages for the
+search and it takes 13 and ½ seconds.<sup class="footnote-reference"><a id="footnote-reference-3" href="#footnote-3">3</a></sup> For contrast, the
+same search with MacPorts:</p>
+<div class="src src-text">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ time port search git
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">real	0m0.702s</span></span></code></pre></div>
+</div>
+<p>
+MacPorts returns 295 packages and takes around 1 second.<sup class="footnote-reference"><a id="footnote-reference-4" href="#footnote-4">4</a></sup></p>
+</div>
+</div>
+<div id="outline-container-headline-8" class="outline-2">
+<h2 id="headline-8">
+Search in name only
+</h2>
+<div id="outline-text-headline-8" class="outline-text-2">
+<p>
+What really irks me isn&#39;t that search is slow, it&#39;s the terse output
+and lack of long descriptions. It would be nice if search would, at
+least optionally, display additional information such as the version
+and short description.</p>
+<p>
+There is a <code class="verbatim">--desc</code> option, but it changes the search semantics rather
+that optionally displaying some additional information about the
+packages returned by the query. It broadens the search to include
+descriptions. This, however, is absurd for Homebrew because many
+package have no description or the descriptions are so short they
+don’t provide additional keywords to match against.</p>
+<p>
+Many other package managers have categories and long descriptions of
+packages that aid package discovery. Homebrew&#39;s vim description is &#34;Vi
+&#39;workalike&#39; with many additional features.&#34; If somebody wanted to see
+every text editor in Homebrew the search <code class="verbatim">brew search --desc editor</code>
+will not return vim. In fact, this search skips many available text
+editors because nobody thought to include &#34;text&#34; or &#34;editor&#34; in the
+descriptions. Contrast Homebrew’s vim description with the description
+in FreeBSD Ports:</p>
+<div class="src src-text">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Vim is a highly configurable text editor built to enable efficient text editing.
+</span></span><span class="line"><span class="cl">It is an improved version of the vi editor distributed with most UNIX systems.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Vim is often called a &#34;programmer&#39;s editor,&#34; and so useful for programming that
+</span></span><span class="line"><span class="cl">many consider it an entire IDE. It&#39;s not just for programmers, though. Vim is
+</span></span><span class="line"><span class="cl">perfect for all kinds of text editing, from composing email to editing
+</span></span><span class="line"><span class="cl">configuration files.
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">FreeBSD has the following Vim packages:
+</span></span><span class="line"><span class="cl">* vim: Console-only Vim (vim binary) with all runtime files
+</span></span><span class="line"><span class="cl">* vim-gtk3, -gtk2, -athena, -motif, -x11: Console Vim plus a GUI (gvim binary)
+</span></span><span class="line"><span class="cl">* vim-tiny: Vim binary only, with no runtime files. Not useful for most people;
+</span></span><span class="line"><span class="cl">  intended for minimal (ex. jail) installations
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">WWW: http://www.vim.org/
+</span></span><span class="line"><span class="cl">WWW: https://github.com/vim/vim</span></span></code></pre></div>
+</div>
+<p>
+The FreeBSD Ports&#39; description contains a good set of keywords to
+match against: text, editor, editing, vi, programmer, programming,
+IDE, composing, email, files.</p>
+</div>
+</div>
+<div id="outline-container-headline-9" class="outline-2">
+<h2 id="headline-9">
+Poor package info
+</h2>
+<div id="outline-text-headline-9" class="outline-text-2">
+<p>
+One consequence of the bad search interface is that I always find
+myself having to use <code class="verbatim">brew info</code> to ensure I’m installing the correct
+package and because there’s no long description, I almost always find
+myself using <code class="verbatim">brew home</code> as well. The repeat <code class="verbatim">brew search</code>, <code class="verbatim">brew
+info</code>, <code class="verbatim">brew home</code> cycles are painful and clunky. The pain is
+compounded by Homebrew&#39;s slowness.</p>
+<p>
+Homebrew’s info command format is crowded, hard to read, and contains
+a lot of extraneous information. Keeping with our vim theme, here is
+vim’s info as presented by Homebrew:</p>
+<div class="src src-text">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ brew info vim
+</span></span><span class="line"><span class="cl">vim: stable 8.2.3400 (bottled), HEAD
+</span></span><span class="line"><span class="cl">Vi &#39;workalike&#39; with many additional features
+</span></span><span class="line"><span class="cl">https://www.vim.org/
+</span></span><span class="line"><span class="cl">Conflicts with:
+</span></span><span class="line"><span class="cl">  ex-vi (because vim and ex-vi both install bin/ex and bin/view)
+</span></span><span class="line"><span class="cl">  macvim (because vim and macvim both install vi* binaries)
+</span></span><span class="line"><span class="cl">Not installed
+</span></span><span class="line"><span class="cl">From: https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/vim.rb
+</span></span><span class="line"><span class="cl">License: Vim
+</span></span><span class="line"><span class="cl">==&gt; Dependencies
+</span></span><span class="line"><span class="cl">Required: gettext ✔, lua ✘, ncurses ✔, perl ✔, python@3.9 ✔, ruby ✘
+</span></span><span class="line"><span class="cl">==&gt; Options
+</span></span><span class="line"><span class="cl">--HEAD
+</span></span><span class="line"><span class="cl">	Install HEAD version
+</span></span><span class="line"><span class="cl">==&gt; Analytics
+</span></span><span class="line"><span class="cl">install: 64,670 (30 days), 176,361 (90 days), 958,195 (365 days)
+</span></span><span class="line"><span class="cl">install-on-request: 64,634 (30 days), 176,252 (90 days), 955,894 (365 days)
+</span></span><span class="line"><span class="cl">build-error: 24 (30 days)</span></span></code></pre></div>
+</div>
+<p>
+Now contrast Homebrew’s info formatting with MacPort&#39;s:</p>
+<div class="src src-text">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">% port info vim
+</span></span><span class="line"><span class="cl">vim @8.2.2683 (editors)
+</span></span><span class="line"><span class="cl">Variants:        athena, big, cscope, gtk2, gtk3, [+]huge, lua, motif,
+</span></span><span class="line"><span class="cl">		 perl, python27, python36, python37, python38, python39,
+</span></span><span class="line"><span class="cl">		 ruby, ruby18, ruby19, ruby20, ruby21, ruby22, ruby23,
+</span></span><span class="line"><span class="cl">		 ruby24, ruby25, small, tcl, tiny, x11, xim
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Description:     Vim is an advanced text editor that seeks to provide the
+</span></span><span class="line"><span class="cl">		 power of the de-facto Unix editor &#39;Vi&#39;, with a more
+</span></span><span class="line"><span class="cl">		 complete feature set.
+</span></span><span class="line"><span class="cl">Homepage:        https://www.vim.org/
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Library Dependencies: ncurses, gettext, libiconv
+</span></span><span class="line"><span class="cl">Platforms:       darwin, freebsd
+</span></span><span class="line"><span class="cl">License:         Vim and GPL-2+
+</span></span><span class="line"><span class="cl">Maintainers:     Email: raimue [at] macports.org, GitHub: raimue</span></span></code></pre></div>
+</div>
+<p>
+It’s incredible how a little formatting and white space beats color
+and dingbats.</p>
+</div>
+</div>
+<div id="outline-container-headline-10" class="outline-2">
+<h2 id="headline-10">
+Conclusion
+</h2>
+<div id="outline-text-headline-10" class="outline-text-2">
+<p>
+Homebrew has some good qualities, but they can be easily replicated by
+existing package manager or new package managers. Creating a package
+manager with a good cutesy name. Now that&#39;s the hard part. Trust me,
+Windows has a package manger called <a href="https://chocolatey.org">Chocolatey</a> 🤢.</p>
+<p>
+There&#39;s no good reason to stretch a metaphor so thin as to give
+components of your package manager confusing names. Additionally a
+package manager should be good at building software and should have a
+plentiful package repository. Homebrew fails all of these.</p>
+<p>
+Don&#39;t automatically perform actions that can take a long time or that
+can break stuff. Especially don&#39;t update and upgrade packages unless
+at user&#39;s request or with the user&#39;s consent.</p>
+<p>
+Slow isn&#39;t the worst thing for a package manager, but if you have to
+be slow—at least make sure you make up for it in some way.</p>
+<p>
+Now for the kicker, I&#39;m still using Homebrew, at least for now. I&#39;ve
+tried so many package managers over the years and there&#39;s no
+one-true-package-manager. They all do things that are baffling and all
+do things that are genius. My ideal package manager would take the
+best of <a href="https://wiki.debian.org/PackageManagement">APT</a>, <a href="https://www.macports.org">MacPorts</a>, <a href="https://www.pkgsrc.org">pkgsrc</a>, <a href="https://github.com/NixOS/nixpkgs">Nix</a>, and yes, even <a href="https://brew.sh">Homebrew</a>.</p>
+<p>
+Is it possible? I don&#39;t know, but I started building a package manager
+by accident. I was attempting to improve the build system for <a href="https://www.xquartz.org">XQuartz</a>
+when I realized I had essentially built a mini-package manager with
+package recipes, dependency graphs, incremental builds, patch phase,
+and so on. It is called <a href="https://github.com/pkgmgr/pkgmgr">pkgmgr</a> and it is a work in progress.</p>
+</div>
+</div>
+<div id="outline-container-headline-11" class="outline-2">
+<h2 id="headline-11">
+Footnotes
+</h2>
+</div>
+<div class="footnotes">
+<hr class="footnotes-separatator">
+<div class="footnote-definitions">
+<div class="footnote-definition">
+<sup id="footnote-1"><a href="#footnote-reference-1">1</a></sup>
+<div class="footnote-body">
+<p>This is from memory, unlike the TeX Live issue, I don&#39;t have
+notes on the Emacs issue.</p>
+</div>
+</div>
+<div class="footnote-definition">
+<sup id="footnote-2"><a href="#footnote-reference-2">2</a></sup>
+<div class="footnote-body">
+<p>I guess they merged Linuxbrew into Homebrew. 🤷‍♂️</p>
+</div>
+</div>
+<div class="footnote-definition">
+<sup id="footnote-3"><a href="#footnote-reference-3">3</a></sup>
+<div class="footnote-body">
+<p>This is a cold start.</p>
+</div>
+</div>
+<div class="footnote-definition">
+<sup id="footnote-4"><a href="#footnote-reference-4">4</a></sup>
+<div class="footnote-body">
+<p>MacPorts was run in a virtual machine so there was some added
+overhead.</p>
+</div>
+</div>
+</div>
+</div>
+
+  <p class="lastmod">Last modified: 2021-11-02 00:00:00 &#43;0000 UTC</p>
+</div>
+
+    </main>
+    <footer class="colophon container">
+  <p class="copyright">&copy; 2025. All rights reserved.</p>
+  <p class="signature">∃</p>
+</footer>
+
+  </div>
+</div>
+</body>
+</html>
