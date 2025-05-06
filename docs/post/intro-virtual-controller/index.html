@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+<title>Introducing Virtual Controller &middot; Halting Problems</title>
+
+
+<link rel="stylesheet" href=/css/fonts.css>
+<link rel="stylesheet" href=/css/syntax.css>
+<link rel="stylesheet" href=/css/stix.css>
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144"
+      href=/apple-touch-icon-144-precomposed.png>
+<link rel="shortcut icon" href=/favicon.ico>
+
+
+<meta property="og:url" content="https://haltingproblems.github.io/post/intro-virtual-controller/">
+  <meta property="og:site_name" content="Halting Problems">
+  <meta property="og:title" content="Introducing Virtual Controller">
+  <meta property="og:description" content="The project is an iPhone app that emulates retro game controllers and a device driver that makes the virtual controller appear to macOS as physical devices. Thus, the iPhone can be a controller for any game or app that supports USB HID game controllers on a Mac (and possibly any iPad with an M-series chip).
+I started this open source project because nothing available comes remotely close to meeting my requirements.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2025-05-06T03:01:59-05:00">
+    <meta property="article:modified_time" content="2025-05-06T03:01:59-05:00">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Introducing Virtual Controller">
+  <meta name="twitter:description" content="The project is an iPhone app that emulates retro game controllers and a device driver that makes the virtual controller appear to macOS as physical devices. Thus, the iPhone can be a controller for any game or app that supports USB HID game controllers on a Mac (and possibly any iPad with an M-series chip).
+I started this open source project because nothing available comes remotely close to meeting my requirements.">
+
+
+</head>
+<body>
+<div class="page">
+  <div class="page-width">
+    <header class="masthead container">
+    <h1 class="masthead-title">
+      <a href=/ title="Home">Halting Problems</a>
+    </h1>
+    
+    <nav class="nav">
+      [
+      
+          <a href="/">Home</a>
+      
+         | <a href="/portfolio/">Portfolio</a>
+      
+         | <a href="/about/">About</a>
+      
+      ]
+    </nav>
+</header>
+
+    <main class="container">
+      
+
+
+
+
+
+
+<div class="post">
+  <header class="post-header">
+    <h1 class="post-title">Introducing Virtual Controller</h1>
+    
+    <h2 class="post-subtitle">I’m making an open source virtual game controller iPhone app and macOS driver</h2>
+    
+    <div class="post-metadata">
+      <span class="post-date">May 6, 2025</span>
+    </div>
+  </header>
+  
+<p>
+The project is an iPhone app that emulates retro game controllers and
+a device driver that makes the virtual controller appear to macOS as
+physical devices. Thus, the iPhone can be a controller for any game or
+app that supports USB HID game controllers on a Mac (and possibly any
+iPad with an M-series chip).</p>
+<p>
+<img src="./driver-demo.gif" alt="./driver-demo.gif" title="./driver-demo.gif" /></p>
+<p>
+I started this open source project because nothing available comes
+remotely close to meeting my requirements.</p>
+<p>
+My requirements for the project are as follows:</p>
+<ul>
+<li>The project is open source</li>
+<li>The app emulates real-world retro devices without setup or
+configuration.</li>
+<li>The driver makes the emulated device indistinguishable from a
+physical device without setup or configuration</li>
+<li>The iPhone app can be distributed on the iOS App Store</li>
+<li>The Mac app and driver can be distributed on the Mac App Store</li>
+<li>The iPhone app and driver can communicate without setup or
+configuration</li>
+</ul>
+<p>The project currently meets all my requirements!</p>
+<div id="outline-container-headline-1" class="outline-2">
+<h2 id="headline-1">
+Progress
+</h2>
+<div id="outline-text-headline-1" class="outline-text-2">
+<ul>
+<li>A working driver that can be installed, recognized by macOS, and
+loaded by the operating system</li>
+<li>A driver host app that installs the driver, connects to the driver&#39;s
+user service, and displays a virtual controller</li>
+<li>An emulated NES controller that is usable from the host app</li>
+<li>Apps such as OpenEmu recognize the emulated device as a working HID
+game controller</li>
+<li>An iPhone app that displays the emulated NES controller and connects
+to the driver</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-headline-2" class="outline-2">
+<h2 id="headline-2">
+Screenshots
+</h2>
+<div id="outline-text-headline-2" class="outline-text-2">
+<p>
+First launch of the macOS app. On macOS, a driver is bundled in a host
+app that manages the driver (installing, updating, and
+uninstalling). This makes it possible to distribute the driver on the
+App Store.</p>
+<img src="./screenshot_01.png" alt="./screenshot_01.png" title="Host app on first launch" class="width-50p center"/>
+<p>
+The label shows the state of the driver in real-time.</p>
+<img src="./screenshot_02.png" alt="./screenshot_02.png" title="Settings driver state label" class="width-50p center"/>
+<p>
+macOS security policy blocks the driver from being installed until the
+user explicitly allows loading it.</p>
+<img src="./screenshot_03.png" alt="./screenshot_03.png" title="Default macOS security policy" class="width-50p center"/>
+<p>
+I find this process tedious, but it&#39;s the Apple way. C&#39;est la vie.</p>
+<img src="./screenshot_04.png" alt="./screenshot_04.png" title="macOS Privacy &amp; Security &#34;Allow&#34; button" class="width-50p center"/>
+<p>
+After user approval, the app&#39;s UI instantly updates. It displays a
+label showing that the driver is installed, and it shows an icon that
+informs the user the app has an open connection to the
+driver. Finally, the virtual controller UI is rendered and is now
+usable.</p>
+<img src="./screenshot_05.png" alt="./screenshot_05.png" title="Driver host app showing virtual controller and state label and IPC icon" class="width-50p center"/>
+<p>
+Apps like OpenEmu can begin using the virtual controller as if there
+were a physical USB HID game controller attached to the Mac.</p>
+<img src="./screenshot_06.png" alt="./screenshot_06.png" title="OpenEmu showing the emulated controller as the input device and the button mapping" class="center"/>
+<p>
+A longer higher quality demo of the driver in action.</p>
+<p>
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+      <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/jJga4tKF-po?autoplay=0&amp;controls=1&amp;end=0&amp;loop=0&amp;mute=0&amp;start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video"></iframe>
+    </div>
+</p>
+</div>
+</div>
+<div id="outline-container-headline-3" class="outline-2">
+<h2 id="headline-3">
+Next steps
+</h2>
+<div id="outline-text-headline-3" class="outline-text-2">
+<p>
+Make the iPhone app talk to the driver and transmit its button state
+changes.</p>
+</div>
+</div>
+
+  <p class="lastmod">Last modified: 2025-05-06 03:01:59 -0500 CDT</p>
+</div>
+
+    </main>
+    <footer class="colophon container">
+  <p class="copyright">&copy; 2025. All rights reserved.</p>
+  <p class="signature">∃</p>
+</footer>
+
+  </div>
+</div>
+</body>
+</html>
